@@ -28,7 +28,12 @@ class ConnectionController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        //validate
+
+        //check if sftp or ftp
+
+        //store
+
     }
 
     /**
