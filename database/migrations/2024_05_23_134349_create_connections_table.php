@@ -12,6 +12,7 @@ return new class extends Migration {
     {
         Schema::create('connections', function (Blueprint $table) {
             $table->id();
+            $table->char('sid', 12)->unique();//String id
             $table->unsignedBigInteger('user_id');
             $table->boolean('is_sftp');
             $table->string('host');
