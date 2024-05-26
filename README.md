@@ -2,7 +2,7 @@
 
 <h1 align="center">Example File actions with FTP and SFTP</h1>
 
-Laravel-ftp-sftp provides examples for using the FTP anf SFTP protocols combined with Laravel to manage files.
+Laravel-ftp-sftp provides examples for using the FTP and SFTP protocols combined with Laravel to manage files.
 
 Examples include:
 
@@ -12,3 +12,5 @@ Examples include:
 - Move
 - Copy
 - Delete
+- Read file
+- Read file from last line read
