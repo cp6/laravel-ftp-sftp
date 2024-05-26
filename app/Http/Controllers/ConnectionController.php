@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Connection;
 use Illuminate\Http\Request;
+use Mockery\Exception;
 
 class ConnectionController extends Controller
 {
@@ -26,14 +27,38 @@ class ConnectionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\RedirectResponse
     {
-        //validate
+        $request->validate([
+            'host' => 'string|required|max:255',
+            'port' => 'integer|required|min:1|max:999999',
+            'username' => 'string|required|max:64',
+            'password' => 'string|nullable|sometimes',
+            'timeout' => 'integer|required|min:1|max:999',
+            'log_actions' => 'boolean|required',
+            'key' => 'string|nullable|sometimes'
+        ]);
+
+        try {
+            $connection = new Connection();
+            $connection->host = $request->host;
+            $connection->port = $request->port;
+            $connection->username = $request->username;
+            $connection->password = $request->password;
+            $connection->timeout = $request->timeout;
+            $connection->log_actions = $request->log_actions;
+            $connection->key = $request->key;
+        } catch (Exception $exception) {
+            //log and return
+            return redirect()->route('connection.create')->with('failed', 'Failed reason: ' . $exception->getMessage());
+        }
 
         //check if sftp or ftp
+        $is_sftp = 1;//Create func
+        $connection->update(['is_sftp' => $is_sftp]);
 
-        //store
-
+        //Redirect to connection show
+        return redirect()->route('connection.show')->with('success', 'Connection added successfully');
     }
 
     /**
