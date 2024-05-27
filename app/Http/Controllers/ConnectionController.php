@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Connection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Mockery\Exception;
 
@@ -45,7 +46,7 @@ class ConnectionController extends Controller
             $connection->host = $request->host;
             $connection->port = $request->port;
             $connection->username = $request->username;
-            $connection->password = $request->password;
+            $connection->password = (!is_null($request->password)) ? Crypt::encryptString($request->password) : null;
             $connection->timeout = $request->timeout;
             $connection->log_actions = $request->log_actions;
             $connection->key = $request->key;
@@ -56,7 +57,7 @@ class ConnectionController extends Controller
         }
 
         //check if sftp or ftp
-        $is_sftp = (is_null(Connection::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, $connection->password))) ? 0 : 1;
+        $is_sftp = (is_null(Connection::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, Crypt::decryptString($connection->key->password)))) ? 0 : 1;
         $connection->update(['is_sftp' => $is_sftp]);
 
         //Redirect to connection show
