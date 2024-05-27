@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Connection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Mockery\Exception;
 
 class ConnectionController extends Controller
@@ -50,11 +51,12 @@ class ConnectionController extends Controller
             $connection->key = $request->key;
         } catch (Exception $exception) {
             //log and return
+            Log::debug($exception->getMessage());
             return redirect()->route('connection.create')->with('failed', 'Failed reason: ' . $exception->getMessage());
         }
 
         //check if sftp or ftp
-        $is_sftp = 1;//Create func
+        $is_sftp = (is_null(Connection::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, $connection->password))) ? 0 : 1;
         $connection->update(['is_sftp' => $is_sftp]);
 
         //Redirect to connection show
