@@ -61,7 +61,7 @@ class ConnectionController extends Controller
         $connection->update(['is_sftp' => $is_sftp]);
 
         //Redirect to connection show
-        return redirect()->route('connection.show')->with('success', 'Connection added successfully');
+        return redirect()->route('connection.show' , $connection)->with('success', 'Connection added successfully');
     }
 
     /**
