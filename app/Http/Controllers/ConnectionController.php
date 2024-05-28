@@ -58,10 +58,19 @@ class ConnectionController extends Controller
 
         //check if sftp or ftp
         $is_sftp = (is_null(Connection::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, Crypt::decryptString($connection->key->password)))) ? 0 : 1;
+
+        if ($is_sftp === 0) {
+            //Try and connect with FTP now
+
+        }
+
+        //If isnt FTP then the connection is not valid
+        //Return back to connection create with this error
+
         $connection->update(['is_sftp' => $is_sftp]);
 
         //Redirect to connection show
-        return redirect()->route('connection.show' , $connection)->with('success', 'Connection added successfully');
+        return redirect()->route('connection.show', $connection)->with('success', 'Connection added successfully');
     }
 
     /**
