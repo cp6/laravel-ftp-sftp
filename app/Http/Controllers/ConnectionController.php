@@ -15,7 +15,7 @@ class ConnectionController extends Controller
      */
     public function index()
     {
-        //
+        return view('connection.index');
     }
 
     /**
@@ -78,7 +78,7 @@ class ConnectionController extends Controller
      */
     public function show(Connection $connection)
     {
-        //
+        return view('connection.show', ['connection' => $connection]);
     }
 
     /**
@@ -86,7 +86,7 @@ class ConnectionController extends Controller
      */
     public function edit(Connection $connection)
     {
-        //
+        return view('connection.edit', ['connection' => $connection]);
     }
 
     /**
