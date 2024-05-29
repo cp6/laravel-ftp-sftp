@@ -58,7 +58,7 @@ class Connection extends Model
         }
     }
 
-    public static function listFtpDirectories(Connection $connection): ?array
+    public static function listFtpDirectories(Connection $connection, string $path = ''): ?array
     {
         try {
             $con = ftp_connect($connection->host, $connection->port, $connection->timeout);
@@ -69,7 +69,7 @@ class Connection extends Model
             (!is_null($connection->password)) ? $decrypted_password = Crypt::decryptString($connection->password) : $decrypted_password = '';
 
             if (@ftp_login($con, $connection->username, $decrypted_password)) {
-                $contents = ftp_nlist($con, ".");
+                $contents = ftp_nlist($con, $path);
 
                 $directories = [];
                 foreach ($contents as $item) {
@@ -92,7 +92,7 @@ class Connection extends Model
         return null;
     }
 
-    public static function listFtpFiles(Connection $connection): ?array
+    public static function listFtpFiles(Connection $connection, string $path = ''): ?array
     {
         try {
             $con = ftp_connect($connection->host, $connection->port, $connection->timeout);
@@ -102,7 +102,7 @@ class Connection extends Model
             $decrypted_password = !is_null($connection->password) ? Crypt::decryptString($connection->password) : '';
 
             if (@ftp_login($con, $connection->username, $decrypted_password)) {
-                $contents = ftp_nlist($con, ".");
+                $contents = ftp_nlist($con, $path);
 
                 $files = [];
                 foreach ($contents as $item) {
