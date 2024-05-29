@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use phpseclib3\Net\SFTP;
@@ -55,6 +56,77 @@ class Connection extends Model
             Log::debug($e->getMessage());
             return null;
         }
+    }
+
+    public static function listFtpDirectories(Connection $connection): ?array
+    {
+        try {
+            $con = ftp_connect($connection->host, $connection->port, $connection->timeout);
+            if (false === $con) {
+                return null;
+            }
+
+            (!is_null($connection->password)) ? $decrypted_password = Crypt::decryptString($connection->password) : $decrypted_password = '';
+
+            if (@ftp_login($con, $connection->username, $decrypted_password)) {
+                $contents = ftp_nlist($con, ".");
+
+                $directories = [];
+                foreach ($contents as $item) {
+                    if (ftp_size($con, $item) === -1) { // size of a directory is -1
+                        $directories[] = $item;
+                    }
+                }
+
+                ftp_close($con);
+
+                return $directories;
+
+            }
+
+            return null;
+
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+        }
+        return null;
+    }
+
+    public static function listFtpFiles(Connection $connection): ?array
+    {
+        try {
+            $con = ftp_connect($connection->host, $connection->port, $connection->timeout);
+            if (false === $con) {
+                return null;
+            }
+            $decrypted_password = !is_null($connection->password) ? Crypt::decryptString($connection->password) : '';
+
+            if (@ftp_login($con, $connection->username, $decrypted_password)) {
+                $contents = ftp_nlist($con, ".");
+
+                $files = [];
+                foreach ($contents as $item) {
+                    $size = ftp_size($con, $item);
+
+                    if ($size !== -1) {
+                        $files[] = [
+                            'name' => $item,
+                            'size' => $size
+                        ];
+                    }
+                }
+
+                ftp_close($con);
+
+                return $files;
+            }
+
+            return null;
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+        }
+
+        return null;
     }
 
 
