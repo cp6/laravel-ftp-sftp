@@ -129,5 +129,62 @@ class Connection extends Model
         return null;
     }
 
+    public static function listSftpDirectories(Connection $connection, string $path = ''): ?array
+    {
+        (!is_null($connection->password)) ? $decrypted_password = Crypt::decryptString($connection->password) : $decrypted_password = '';
+
+        $sftp = self::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, $decrypted_password);
+
+        if (!$sftp) {
+            return null;
+        }
+
+        try {
+            $directories = $sftp->nlist($path);
+            $directoryList = [];
+            foreach ($directories as $directory) {
+                if ($sftp->is_dir($path . '/' . $directory)) {
+                    $directoryList[] = $directory;
+                }
+            }
+
+            return $directoryList;
+        } catch (\Exception $exception) {
+            return null;
+        }
+    }
+
+    public static function listSftpFiles(Connection $connection, string $path = ''): ?array
+    {
+        (!is_null($connection->password)) ? $decrypted_password = Crypt::decryptString($connection->password) : $decrypted_password = '';
+
+        $sftp = self::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, $decrypted_password);
+
+
+        if (!$sftp) {
+            return null;
+        }
+
+        try {
+            $files = $sftp->nlist($path);
+
+            $fileList = [];
+            foreach ($files as $file) {
+                $filePath = $path . '/' . $file;
+                if ($sftp->is_file($filePath)) {
+                    $stat = $sftp->stat($filePath);
+                    $fileList[] = [
+                        'name' => $file,
+                        'size' => $stat['size']
+                    ];
+                }
+            }
+
+            return $fileList;
+        } catch (\Exception $exception) {
+            return null;
+        }
+    }
+
 
 }
