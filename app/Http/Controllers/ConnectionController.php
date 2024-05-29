@@ -50,6 +50,9 @@ class ConnectionController extends Controller
             $connection->timeout = $request->timeout;
             $connection->log_actions = $request->log_actions;
             $connection->key = $request->key;
+
+            (!is_null($request->password)) ? $decrypted_password = Crypt::decryptString($connection->key->password) : $decrypted_password = '';
+
         } catch (Exception $exception) {
             //log and return
             Log::debug($exception->getMessage());
@@ -57,10 +60,10 @@ class ConnectionController extends Controller
         }
 
         //Try and connect with SFTP
-        if (is_null(Connection::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, Crypt::decryptString($connection->key->password)))) {
+        if (is_null(Connection::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, $decrypted_password))) {
 
             //Try and connect with FTP now
-            if (is_null(Connection::makeFtpConnection($connection->host, $connection->port, $connection->username, Crypt::decryptString($connection->key->password)))) {
+            if (is_null(Connection::makeFtpConnection($connection->host, $connection->port, $connection->username, $decrypted_password))) {
                 $connection->delete();
                 return redirect()->route('connection.create')->with('failed', 'Failed to connect with SFTP and FTP');
             }
