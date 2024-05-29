@@ -56,21 +56,24 @@ class ConnectionController extends Controller
             return redirect()->route('connection.create')->with('failed', 'Failed reason: ' . $exception->getMessage());
         }
 
-        //check if sftp or ftp
-        $is_sftp = (is_null(Connection::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, Crypt::decryptString($connection->key->password)))) ? 0 : 1;
+        //Try and connect with SFTP
+        if (is_null(Connection::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, Crypt::decryptString($connection->key->password)))) {
 
-        if ($is_sftp === 0) {
             //Try and connect with FTP now
+            if (is_null(Connection::makeFtpConnection($connection->host, $connection->port, $connection->username, Crypt::decryptString($connection->key->password)))) {
+                $connection->delete();
+                return redirect()->route('connection.create')->with('failed', 'Failed to connect with SFTP and FTP');
+            }
 
+            //Connected via FTP
+            $connection->update(['is_sftp' => 0]);
+        } else {
+            $connection->update(['is_sftp' => 1]);//SFTP
         }
-
-        //If isnt FTP then the connection is not valid
-        //Return back to connection create with this error
-
-        $connection->update(['is_sftp' => $is_sftp]);
 
         //Redirect to connection show
         return redirect()->route('connection.show', $connection)->with('success', 'Connection added successfully');
+
     }
 
     /**
