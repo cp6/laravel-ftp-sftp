@@ -6,11 +6,25 @@ Laravel-ftp-sftp provides examples for using the FTP and SFTP protocols combined
 
 Examples include:
 
-- Upload
-- Download
-- Rename
-- Move
-- Copy
-- Delete
-- Read file
+- List directories
+- List files and sizes
+- Upload file
+- Download file
+- Rename file
+- Move file
+- Copy file
+- Delete file
+- Read file without downloading all of it
 - Read file from last line read
+
+
+<h2>The main models</h2>
+
+<h3>Connection</h3>
+a
+
+<h3>File</h3>
+a
+
+<h3>ReadFile</h3>
+a
