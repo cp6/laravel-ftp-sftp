@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('last_line_read')->nullable()->default(null);
             $table->integer('total_lines')->nullable()->default(null);
             $table->timestamps();
-            $table->foreign('file_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('file_id')->references('id')->on('files')->onDelete('cascade');
         });
     }
 
