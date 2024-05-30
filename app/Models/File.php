@@ -4,8 +4,76 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class File extends Model
 {
     use HasFactory;
+
+    protected $fillable = ['size_kb', 'ext', 'saved_to', 'saved_as', 'original_dir', 'original_name'];
+
+    protected $with = ['connection', 'read'];
+
+    public function read(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(ReadFile::class, 'file_id', 'id');
+    }
+
+    public function connection(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Connection::class, 'connection_id', 'id');
+    }
+
+    public static function downloadFtpFile(Connection $connection, string $file_to_download, string $save_to, string $save_as): bool
+    {
+        try {
+            $con = ftp_connect($connection->host, $connection->port, $connection->timeout);
+            if (false === $con) {
+                return false;
+            }
+
+            (!is_null($connection->password)) ? $decrypted_password = Crypt::decryptString($connection->password) : $decrypted_password = '';
+
+            if (@ftp_login($con, $connection->username, $decrypted_password)) {
+                $handle = fopen('php://temp', 'wb+');
+                if (!ftp_fget($con, $handle, $file_to_download, FTP_BINARY)) {
+                    fclose($handle);
+                    ftp_close($con);
+                    return false;
+                }
+
+                fseek($handle, 0);
+                $fileContents = stream_get_contents($handle);
+                fclose($handle);
+
+                Storage::disk('public')->put($save_to . $save_as, $fileContents);
+
+                ftp_close($con);
+
+                $file = new File();
+                $file->sid = Str::random(12);
+                $file->connection_id = $connection->id;
+                $file->user_id = Auth::id();
+                $file->size_kb = Storage::disk('public')->size($save_to . $save_as) / 1024;
+                $file->ext = pathinfo($file_to_download, PATHINFO_EXTENSION);
+                $file->original_name = basename($file_to_download);
+                $file->original_dir = dirname($file_to_download);
+                $file->saved_to = $save_to;
+                $file->saved_as = $save_as;
+                $file->save();
+
+                return true;
+            }
+
+            return false;
+
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+        }
+        return false;
+    }
 }
