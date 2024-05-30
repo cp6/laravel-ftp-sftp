@@ -6,13 +6,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
-use phpseclib3\Net\SFTP;
-use phpseclib3\Net\SFTP\Stream;
 
 class ReadFile extends Model
 {
     use HasFactory;
 
+    public function file(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(File::class, 'file_id', 'id');
+    }
 
     public static function readLinesFtp(Connection $connection, string $file_path, int $start = 0, int $end = 100): ?array
     {
