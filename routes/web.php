@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ConnectionController;
+use App\Http\Controllers\FileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -21,6 +22,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/connections/{connection}', [ConnectionController::class, 'destroy'])->name('connection.destroy');
 
     Route::get('/connections', [ConnectionController::class, 'index'])->name('profile.edit');
+
+
+    Route::get('/file/{file}', [FileController::class, 'show'])->name('file.show');
 });
 
 require __DIR__ . '/auth.php';
