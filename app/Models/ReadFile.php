@@ -6,10 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ReadFile extends Model
 {
     use HasFactory;
+
+    protected $fillable = ['file_id', 'last_line_read', 'total_lines'];
 
     public function file(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
@@ -55,6 +58,36 @@ class ReadFile extends Model
         }
 
         fclose($tempStream);
+
+        return $lines;
+    }
+
+    public static function readFileFromStorage(string $file_directory, string $file, int $start = 0, int $end = 100): ?array
+    {
+        if (!Storage::disk('public')->fileExists($file_directory . $file)) {
+            return null;
+        }
+
+        $read = self::firstOrCreate(['directory' => $file_directory, 'file' => $file], []);
+
+        $lines = [];
+        $lineNumber = 0;
+
+        $handle = Storage::disk('public')->readStream($file_directory . $file);
+
+        if ($handle !== false) {
+            while (($line = fgets($handle)) !== false) {
+                if ($lineNumber >= $start && $lineNumber <= $end) {
+                    $lines[] = $line;
+                }
+                if ($lineNumber > $end) {
+                    break;
+                }
+                $lineNumber++;
+            }
+
+            fclose($handle);
+        }
 
         return $lines;
     }
