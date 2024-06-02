@@ -8,6 +8,7 @@ Examples include:
 
 - List directories
 - List files and sizes
+- List directories and files
 - Upload file
 - Download file
 - Rename file
