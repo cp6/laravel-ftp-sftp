@@ -19,7 +19,7 @@ Examples include:
 - Read file from last line read
 
 
-<h2>The main models</h2>
+<h2>The main models and their roles</h2>
 
 <h3>Connection</h3>
 Used for creating SFTP and FTP connections
