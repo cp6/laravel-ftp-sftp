@@ -55,14 +55,12 @@ class File extends Model
     public static function downloadFtpFile(Connection $connection, string $file_to_download, string $disk, string $save_to, string $save_as): bool
     {
         try {
-            $con = ftp_connect($connection->host, $connection->port, $connection->timeout);
+            $con = Connection::makeFtpConnection($connection->host, $connection->port, $connection->username, $connection->password);
             if (false === $con) {
                 return false;
             }
 
-            (!is_null($connection->password)) ? $decrypted_password = Crypt::decryptString($connection->password) : $decrypted_password = '';
-
-            if (@ftp_login($con, $connection->username, $decrypted_password)) {
+            if ($con) {
                 $handle = fopen('php://temp', 'wb+');
                 if (!ftp_fget($con, $handle, $file_to_download, FTP_BINARY)) {
                     fclose($handle);
@@ -131,14 +129,12 @@ class File extends Model
     public static function renameFtpFile(Connection $connection, string $current_path, string $new_name): bool
     {
         try {
-            $ftp = ftp_connect($connection->host, $connection->port, $connection->timeout);
+            $ftp = Connection::makeFtpConnection($connection->host, $connection->port, $connection->username, $connection->password);
             if (false === $ftp) {
                 return false;
             }
 
-            $decrypted_password = (!is_null($connection->password)) ? Crypt::decryptString($connection->password) : '';
-
-            if (@ftp_login($ftp, $connection->username, $decrypted_password)) {
+            if ($ftp) {
                 $new_path = dirname($current_path) . '/' . $new_name;
 
                 $file_exists = @ftp_size($ftp, $new_path) !== -1;
@@ -158,9 +154,6 @@ class File extends Model
             return false;
         } catch (\Exception $exception) {
             Log::debug($exception->getMessage());
-            if ($ftp) {
-                ftp_close($ftp);
-            }
             return false;
         }
     }

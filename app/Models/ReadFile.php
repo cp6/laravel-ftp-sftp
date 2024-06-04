@@ -35,9 +35,7 @@ class ReadFile extends Model
 
     public static function readLinesFtp(Connection $connection, string $file_path, int $start = 0, int $end = 100): ?array
     {
-        (!is_null($connection->password)) ? $decrypted_password = Crypt::decryptString($connection->password) : $decrypted_password = '';
-
-        $ftp_con = Connection::makeFtpConnection($connection->host, $connection->port, $connection->username, $decrypted_password);
+        $ftp_con = Connection::makeFtpConnection($connection->host, $connection->port, $connection->username, $connection->password);
 
         if (is_null($ftp_con)) {
             Log::debug('Connection could not be made');

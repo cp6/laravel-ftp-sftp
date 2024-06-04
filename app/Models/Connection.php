@@ -47,12 +47,16 @@ class Connection extends Model
         return $sftp;
     }
 
-    public static function makeFtpConnection(string $host, int $port, string $user, string $password, int $timeout = 8): ?\FTP\Connection
+    public static function makeFtpConnection(string $host, int $port, string $user, ?string $password = '', int $timeout = 8): ?\FTP\Connection
     {
         try {
             $con = ftp_connect($host, $port, $timeout);
             if (false === $con) {
                 return null;
+            }
+
+            if (!is_null($password)) {//Has password set
+                $password = Crypt::decryptString($password);
             }
 
             $ftp_login = ftp_login($con, $user, $password);
@@ -71,19 +75,17 @@ class Connection extends Model
     public static function listFtpDirectories(Connection $connection, string $path = ''): ?array
     {
         try {
-            $con = ftp_connect($connection->host, $connection->port, $connection->timeout);
+            $con = self::makeFtpConnection($connection->host, $connection->port, $connection->username, $connection->password);
             if (false === $con) {
                 return null;
             }
 
-            (!is_null($connection->password)) ? $decrypted_password = Crypt::decryptString($connection->password) : $decrypted_password = '';
-
-            if (@ftp_login($con, $connection->username, $decrypted_password)) {
+            if ($con) {
                 $contents = ftp_nlist($con, $path);
 
                 $directories = [];
                 foreach ($contents as $item) {
-                    if (ftp_size($con, $item) === -1) { // size of a directory is -1
+                    if (ftp_size($con, $item) === -1) {
                         $directories[] = $item;
                     }
                 }
@@ -105,13 +107,12 @@ class Connection extends Model
     public static function listFtpFiles(Connection $connection, string $path = ''): ?array
     {
         try {
-            $con = ftp_connect($connection->host, $connection->port, $connection->timeout);
+            $con = self::makeFtpConnection($connection->host, $connection->port, $connection->username, $connection->password);
             if (false === $con) {
                 return null;
             }
-            $decrypted_password = !is_null($connection->password) ? Crypt::decryptString($connection->password) : '';
 
-            if (@ftp_login($con, $connection->username, $decrypted_password)) {
+            if ($con) {
                 $contents = ftp_nlist($con, $path);
 
                 $files = [];
@@ -121,7 +122,8 @@ class Connection extends Model
                     if ($size !== -1) {
                         $files[] = [
                             'name' => $item,
-                            'size' => $size
+                            'size' => $size,
+                            'size_kb' => $size / 1024,
                         ];
                     }
                 }
