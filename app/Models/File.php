@@ -96,7 +96,7 @@ class File extends Model
     public static function downloadSftpFile(Connection $connection, string $file_to_download, string $disk, string $save_to, string $save_as): bool
     {
         try {
-            $sftp = Connection::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, $connection->password);
+            $sftp = Connection::makeSftpConnection($connection->host, $connection->port, $connection->username, $connection->password);
 
             if ($sftp) {
                 $fileContents = $sftp->get($file_to_download);
@@ -161,7 +161,7 @@ class File extends Model
     public static function renameSftpFile(Connection $connection, string $current_path, string $new_name): bool
     {
         try {
-            $sftp = Connection::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, $connection->password);
+            $sftp = Connection::makeSftpConnection($connection->host, $connection->port, $connection->username, $connection->password);
 
             if ($sftp) {
                 $new_path = dirname($current_path) . '/' . $new_name;
@@ -186,7 +186,7 @@ class File extends Model
     public static function outputSftpFileToBrowser(Connection $connection, string $file_path)
     {
         try {
-            $sftp = Connection::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, $connection->password);
+            $sftp = Connection::makeSftpConnection($connection->host, $connection->port, $connection->username, $connection->password);
 
             if ($sftp) {
                 $fileContents = $sftp->get($file_path);
