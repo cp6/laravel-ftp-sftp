@@ -23,7 +23,6 @@ return new class extends Migration
             $table->string('original_dir')->nullable()->default(null);
             $table->string('original_name')->nullable()->default(null);
             $table->timestamps();
-            $table->unique(['connection_id', 'original_dir', 'original_name']);
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('connection_id')->references('id')->on('connections')->onDelete('cascade');
         });
