@@ -186,4 +186,30 @@ class File extends Model
         }
     }
 
+    public static function outputSftpFileToBrowser(Connection $connection, string $file_path)
+    {
+        try {
+            $sftp = new SFTP($connection->host, $connection->port, $connection->timeout);
+            $decrypted_password = (!is_null($connection->password)) ? Crypt::decryptString($connection->password) : '';
+
+            if ($sftp->login($connection->username, $decrypted_password)) {
+                $fileContents = $sftp->get($file_path);
+
+                if ($fileContents === false) {
+                    abort(500, 'Failed to retrieve the file.');
+                }
+
+                return response($fileContents, 200)
+                    ->header('Content-Type', 'text/plain')
+                    ->header('Content-Disposition', 'inline; filename="' . basename($file_path) . '"');
+            }
+
+            abort(500, 'Failed to retrieve the file.');
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+            abort(500, 'Failed to retrieve the file.');
+        }
+    }
+
+
 }
