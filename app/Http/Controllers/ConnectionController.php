@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Mockery\Exception;
+use phpseclib3\Net\SFTP;
 
 class ConnectionController extends Controller
 {
@@ -49,9 +50,9 @@ class ConnectionController extends Controller
             $connection->password = (!is_null($request->password)) ? Crypt::encryptString($request->password) : null;
             $connection->timeout = $request->timeout;
             $connection->log_actions = $request->log_actions;
-            $connection->key = $request->key;
-
-            (!is_null($request->password)) ? $decrypted_password = $request->password : $decrypted_password = '';
+            $connection->is_sftp = 0;//Need to prove that it is!!
+            $connection->key = (!is_null($request->key)) ? Crypt::encryptString(trim($request->key)) : null;
+            $connection->save();
 
         } catch (Exception $exception) {
             //log and return
@@ -60,21 +61,26 @@ class ConnectionController extends Controller
         }
 
         //Try and connect with SFTP
-        if (is_null(Connection::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, $decrypted_password, 4))) {
+        $sftp = Connection::makeSftpConnection($connection->host, $connection->port, $connection->username, $connection->password, 4, $connection->key);
+
+        if (is_null($sftp)) {
+            Log::debug('Connecting via SFTP failed');
 
             //Try and connect with FTP now
-            if (is_null(Connection::makeFtpConnection($connection->host, $connection->port, $connection->username, $decrypted_password,4))) {
+            $ftp = Connection::makeFtpConnection($connection->host, $connection->port, $connection->username, $connection->password, 4);
+
+            if (is_null($ftp)) {
+                Log::debug('Connecting via FTP failed');
+                Log::debug('Deleting Connection');
                 $connection->delete();
                 return redirect()->route('connection.create')->with('failed', 'Failed to connect with SFTP and FTP');
             }
-
             //Connected via FTP
-            $connection->is_sftp = 0;
+            $is_sftp = 0;
         } else {
-            $connection->is_sftp = 1;//SFTP
+            $is_sftp = 1;//SFTP
         }
-
-        $connection->save();
+        $connection->update(['is_sftp' => $is_sftp]);
 
         //Redirect to connection show
         return redirect()->route('connection.show', $connection)->with('success', 'Connection added successfully');
@@ -85,7 +91,6 @@ class ConnectionController extends Controller
      */
     public function show(Connection $connection): \Illuminate\Http\JsonResponse
     {
-        dd(Connection::listFtpFiles($connection, '/disk'));
         return response()->json($connection);
     }
 
