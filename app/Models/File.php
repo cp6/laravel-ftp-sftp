@@ -29,6 +29,23 @@ class File extends Model
         return $this->belongsTo(Connection::class, 'connection_id', 'id');
     }
 
+    public static function createNew(int $connection_id, string $file_to_download, string $save_to, string $save_as): File
+    {
+        $file = new File();
+        $file->sid = Str::random(12);
+        $file->connection_id = $connection_id;
+        $file->user_id = Auth::id();
+        $file->size_kb = Storage::disk('public')->size($save_to . $save_as) / 1024;
+        $file->ext = pathinfo($file_to_download, PATHINFO_EXTENSION);
+        $file->original_name = basename($file_to_download);
+        $file->original_dir = dirname($file_to_download);
+        $file->saved_to = $save_to;
+        $file->saved_as = $save_as;
+        $file->save();
+        return $file;
+    }
+
+
     public static function downloadFtpFile(Connection $connection, string $file_to_download, string $save_to, string $save_as): bool
     {
         try {
@@ -51,35 +68,24 @@ class File extends Model
                 $fileContents = stream_get_contents($handle);
                 fclose($handle);
 
-                Storage::disk('public')->put($save_to . $save_as, $fileContents);
+                if (Storage::disk('public')->put($save_to . $save_as, $fileContents)) {
+                    $file = self::createNew($connection->id, $file_to_download, $save_to, $save_as);
+
+                    $mime = Storage::disk('public')->mimeType($save_to . $save_as);
+                    if (str_starts_with($mime, 'text/')) {
+                        ReadFile::createNew($file->id);
+                    }
+                }
 
                 ftp_close($con);
-
-                $file = new File();
-                $file->sid = Str::random(12);
-                $file->connection_id = $connection->id;
-                $file->user_id = Auth::id();
-                $file->size_kb = Storage::disk('public')->size($save_to . $save_as) / 1024;
-                $file->ext = pathinfo($file_to_download, PATHINFO_EXTENSION);
-                $file->original_name = basename($file_to_download);
-                $file->original_dir = dirname($file_to_download);
-                $file->saved_to = $save_to;
-                $file->saved_as = $save_as;
-                $file->save();
-
-                $mime = Storage::disk('public')->mimeType($save_to . $save_as);
-                if (str_starts_with($mime, 'text/')) {
-                    ReadFile::createNew($file->id);
-                }
 
                 return true;
             }
 
-            return false;
-
         } catch (\Exception $exception) {
             Log::debug($exception->getMessage());
         }
+
         return false;
     }
 
@@ -96,29 +102,21 @@ class File extends Model
                     return false;
                 }
 
-                Storage::disk('public')->put($save_to . $save_as, $fileContents);
+                if (Storage::disk('public')->put($save_to . $save_as, $fileContents)) {
 
-                $file = new File();
-                $file->sid = Str::random(12);
-                $file->connection_id = $connection->id;
-                $file->user_id = Auth::id();
-                $file->size_kb = Storage::disk('public')->size($save_to . $save_as) / 1024;
-                $file->ext = pathinfo($file_to_download, PATHINFO_EXTENSION);
-                $file->original_name = basename($file_to_download);
-                $file->original_dir = dirname($file_to_download);
-                $file->saved_to = $save_to;
-                $file->saved_as = $save_as;
-                $file->save();
+                    $file = self::createNew($connection->id, $file_to_download, $save_to, $save_as);
 
-                $mime = Storage::disk('public')->mimeType($save_to . $save_as);
-                if (str_starts_with($mime, 'text/')) {
-                    ReadFile::createNew($file->id);
+                    $mime = Storage::disk('public')->mimeType($save_to . $save_as);
+                    if (str_starts_with($mime, 'text/')) {
+                        Log::debug(5);
+                        ReadFile::createNew($file->id);
+                    }
+
                 }
 
                 return true;
             }
 
-            return false;
         } catch (\Exception $exception) {
             Log::debug($exception->getMessage());
         }
