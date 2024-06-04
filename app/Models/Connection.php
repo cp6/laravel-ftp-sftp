@@ -31,11 +31,14 @@ class Connection extends Model
         });
     }
 
-    public static function makeSftpConnectionPassword(string $host, int $port, string $user, string $password, int $timeout = 8): ?SFTP
+    public static function makeSftpConnectionPassword(string $host, int $port, string $user, ?string $password = '', int $timeout = 8, ?string $key = ''): ?SFTP
     {
         $sftp = new SFTP($host, $port, $timeout);
 
         try {
+            if (!is_null($password)) {//Has password set
+                $password = Crypt::decryptString($password);
+            }
             $sftp->login($user, $password);
         } catch (\Exception $exception) {
             return null;
@@ -138,9 +141,7 @@ class Connection extends Model
 
     public static function listSftpDirectories(Connection $connection, string $path = ''): ?array
     {
-        (!is_null($connection->password)) ? $decrypted_password = Crypt::decryptString($connection->password) : $decrypted_password = '';
-
-        $sftp = self::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, $decrypted_password);
+        $sftp = self::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, $connection->password);
 
         if (!$sftp) {
             return null;
@@ -163,10 +164,7 @@ class Connection extends Model
 
     public static function listSftpFiles(Connection $connection, string $path = ''): ?array
     {
-        (!is_null($connection->password)) ? $decrypted_password = Crypt::decryptString($connection->password) : $decrypted_password = '';
-
-        $sftp = self::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, $decrypted_password);
-
+        $sftp = self::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, $connection->password);
 
         if (!$sftp) {
             return null;

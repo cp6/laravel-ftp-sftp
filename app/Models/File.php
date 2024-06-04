@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use phpseclib3\Net\SFTP;
 
 class File extends Model
 {
@@ -99,10 +98,9 @@ class File extends Model
     public static function downloadSftpFile(Connection $connection, string $file_to_download, string $disk, string $save_to, string $save_as): bool
     {
         try {
-            $sftp = new SFTP($connection->host, $connection->port, $connection->timeout);
-            $decrypted_password = (!is_null($connection->password)) ? Crypt::decryptString($connection->password) : '';
+            $sftp = Connection::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, $connection->password);
 
-            if ($sftp->login($connection->username, $decrypted_password)) {
+            if ($sftp) {
                 $fileContents = $sftp->get($file_to_download);
 
                 if ($fileContents === false) {
@@ -170,10 +168,9 @@ class File extends Model
     public static function renameSftpFile(Connection $connection, string $current_path, string $new_name): bool
     {
         try {
-            $sftp = new SFTP($connection->host, $connection->port, $connection->timeout);
-            $decrypted_password = (!is_null($connection->password)) ? Crypt::decryptString($connection->password) : '';
+            $sftp = Connection::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, $connection->password);
 
-            if ($sftp->login($connection->username, $decrypted_password)) {
+            if ($sftp) {
                 $new_path = dirname($current_path) . '/' . $new_name;
 
                 if ($sftp->file_exists($new_path)) {
@@ -196,10 +193,9 @@ class File extends Model
     public static function outputSftpFileToBrowser(Connection $connection, string $file_path)
     {
         try {
-            $sftp = new SFTP($connection->host, $connection->port, $connection->timeout);
-            $decrypted_password = (!is_null($connection->password)) ? Crypt::decryptString($connection->password) : '';
+            $sftp = Connection::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, $connection->password);
 
-            if ($sftp->login($connection->username, $decrypted_password)) {
+            if ($sftp) {
                 $fileContents = $sftp->get($file_path);
 
                 if ($fileContents === false) {
