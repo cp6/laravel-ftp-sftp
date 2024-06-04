@@ -51,7 +51,7 @@ class ConnectionController extends Controller
             $connection->log_actions = $request->log_actions;
             $connection->key = $request->key;
 
-            (!is_null($request->password)) ? $decrypted_password = Crypt::decryptString($connection->password) : $decrypted_password = '';
+            (!is_null($request->password)) ? $decrypted_password = $request->password : $decrypted_password = '';
 
         } catch (Exception $exception) {
             //log and return
@@ -78,7 +78,6 @@ class ConnectionController extends Controller
 
         //Redirect to connection show
         return redirect()->route('connection.show', $connection)->with('success', 'Connection added successfully');
-
     }
 
     /**
@@ -86,6 +85,7 @@ class ConnectionController extends Controller
      */
     public function show(Connection $connection): \Illuminate\Http\JsonResponse
     {
+        dd(Connection::listFtpFiles($connection, '/disk'));
         return response()->json($connection);
     }
 
