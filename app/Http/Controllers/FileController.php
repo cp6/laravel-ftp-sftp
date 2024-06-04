@@ -10,9 +10,9 @@ class FileController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): \Illuminate\Http\JsonResponse
     {
-        //
+        return response()->json(File::all());
     }
 
     /**
@@ -34,9 +34,9 @@ class FileController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(File $file)
+    public function show(File $file): \Illuminate\Http\JsonResponse
     {
-        //
+        return response()->json($file);
     }
 
     /**

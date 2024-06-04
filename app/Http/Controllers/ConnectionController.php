@@ -13,9 +13,9 @@ class ConnectionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): \Illuminate\Http\JsonResponse
     {
-        return view('connection.index');
+        return response()->json(Connection::all());
     }
 
     /**
@@ -51,7 +51,7 @@ class ConnectionController extends Controller
             $connection->log_actions = $request->log_actions;
             $connection->key = $request->key;
 
-            (!is_null($request->password)) ? $decrypted_password = Crypt::decryptString($connection->key->password) : $decrypted_password = '';
+            (!is_null($request->password)) ? $decrypted_password = Crypt::decryptString($connection->password) : $decrypted_password = '';
 
         } catch (Exception $exception) {
             //log and return
@@ -60,19 +60,21 @@ class ConnectionController extends Controller
         }
 
         //Try and connect with SFTP
-        if (is_null(Connection::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, $decrypted_password))) {
+        if (is_null(Connection::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, $decrypted_password, 4))) {
 
             //Try and connect with FTP now
-            if (is_null(Connection::makeFtpConnection($connection->host, $connection->port, $connection->username, $decrypted_password))) {
+            if (is_null(Connection::makeFtpConnection($connection->host, $connection->port, $connection->username, $decrypted_password,4))) {
                 $connection->delete();
                 return redirect()->route('connection.create')->with('failed', 'Failed to connect with SFTP and FTP');
             }
 
             //Connected via FTP
-            $connection->update(['is_sftp' => 0]);
+            $connection->is_sftp = 0;
         } else {
-            $connection->update(['is_sftp' => 1]);//SFTP
+            $connection->is_sftp = 1;//SFTP
         }
+
+        $connection->save();
 
         //Redirect to connection show
         return redirect()->route('connection.show', $connection)->with('success', 'Connection added successfully');
@@ -82,9 +84,9 @@ class ConnectionController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Connection $connection)
+    public function show(Connection $connection): \Illuminate\Http\JsonResponse
     {
-        return view('connection.show', ['connection' => $connection]);
+        return response()->json($connection);
     }
 
     /**
