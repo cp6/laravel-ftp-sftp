@@ -8,6 +8,7 @@ Examples include:
 
 - List directories
 - List files and sizes
+- List directories and files
 - Upload file
 - Download file
 - Rename file
@@ -18,13 +19,13 @@ Examples include:
 - Read file from last line read
 
 
-<h2>The main models</h2>
+<h2>The main models and their roles</h2>
 
 <h3>Connection</h3>
-a
+Used for creating SFTP and FTP connections
 
 <h3>File</h3>
-a
+File actions such as downloading, uploading and deleting.
 
 <h3>ReadFile</h3>
-a
+Reading lines in a file without downloading the whole file, this is great for larger files.
