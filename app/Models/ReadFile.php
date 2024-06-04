@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Models\Scopes\UserOwnedScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -42,9 +41,9 @@ class ReadFile extends Model
             return null;
         }
 
-        $tempStream = fopen('php://temp', 'rb+');
+        $temp_stream = fopen('php://temp', 'rb+');
 
-        $result = ftp_nb_fget($ftp_con, $tempStream, $file_path, FTP_ASCII);
+        $result = ftp_nb_fget($ftp_con, $temp_stream, $file_path, FTP_ASCII);
 
         $lines = [];
         $lineCount = 0;
@@ -52,9 +51,9 @@ class ReadFile extends Model
         while ($result === FTP_MOREDATA) {
             $result = ftp_nb_continue($ftp_con);
 
-            rewind($tempStream);
-            while (!feof($tempStream)) {
-                $line = fgets($tempStream);
+            rewind($temp_stream);
+            while (!feof($temp_stream)) {
+                $line = fgets($temp_stream);
                 if ($line === false) {
                     break;
                 }
@@ -66,39 +65,41 @@ class ReadFile extends Model
                     break 2;
                 }
             }
-            ftruncate($tempStream, 0);
+            ftruncate($temp_stream, 0);
         }
 
-        fclose($tempStream);
+        fclose($temp_stream);
 
         return $lines;
     }
 
-    public static function readFileFromStorage(string $file_directory, string $file, int $start = 0, int $end = 100): ?array
+    public static function readFileFromStorage(File $file, int $start = 0, int $end = 100): ?array
     {
-        if (!Storage::disk('public')->fileExists($file_directory . $file)) {
+        if (!File::fileExists($file)) {
             return null;
         }
 
-        $read = self::firstOrCreate(['directory' => $file_directory, 'file' => $file], []);
+        $read_file = self::firstOrCreate(['directory' => $file->saved_to, 'file' => $file->saved_as], []);
 
         $lines = [];
-        $lineNumber = 0;
+        $line_number = 0;
 
-        $handle = Storage::disk('public')->readStream($file_directory . $file);
+        $handle = Storage::disk($file->disk)->readStream($file->saved_to . '/' . $file->saved_as);
 
         if ($handle !== false) {
             while (($line = fgets($handle)) !== false) {
-                if ($lineNumber >= $start && $lineNumber <= $end) {
+                if ($line_number >= $start && $line_number <= $end) {
                     $lines[] = $line;
                 }
-                if ($lineNumber > $end) {
+                if ($line_number > $end) {
                     break;
                 }
-                $lineNumber++;
+                $line_number++;
             }
 
             fclose($handle);
+
+            $read_file->update(['last_line_read' => $line_number]);
         }
 
         return $lines;
