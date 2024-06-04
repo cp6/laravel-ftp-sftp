@@ -16,7 +16,7 @@ class File extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['size_kb', 'ext', 'saved_to', 'saved_as', 'original_dir', 'original_name'];
+    protected $fillable = ['size_kb', 'ext', 'disk', 'saved_to', 'saved_as', 'original_dir', 'original_name'];
 
     protected $with = ['connection', 'read'];
 
@@ -53,7 +53,7 @@ class File extends Model
     }
 
 
-    public static function downloadFtpFile(Connection $connection, string $file_to_download, string $save_to, string $save_as): bool
+    public static function downloadFtpFile(Connection $connection, string $file_to_download, string $disk, string $save_to, string $save_as): bool
     {
         try {
             $con = ftp_connect($connection->host, $connection->port, $connection->timeout);
@@ -75,10 +75,10 @@ class File extends Model
                 $fileContents = stream_get_contents($handle);
                 fclose($handle);
 
-                if (Storage::disk('public')->put($save_to . $save_as, $fileContents)) {
+                if (Storage::disk($disk)->put($save_to . $save_as, $fileContents)) {
                     $file = self::createNew($connection->id, $file_to_download, $save_to, $save_as);
 
-                    $mime = Storage::disk('public')->mimeType($save_to . $save_as);
+                    $mime = Storage::disk($disk)->mimeType($save_to . $save_as);
                     if (str_starts_with($mime, 'text/')) {
                         ReadFile::createNew($file->id);
                     }
@@ -96,7 +96,7 @@ class File extends Model
         return false;
     }
 
-    public static function downloadSftpFile(Connection $connection, string $file_to_download, string $save_to, string $save_as): bool
+    public static function downloadSftpFile(Connection $connection, string $file_to_download, string $disk, string $save_to, string $save_as): bool
     {
         try {
             $sftp = new SFTP($connection->host, $connection->port, $connection->timeout);
@@ -109,11 +109,11 @@ class File extends Model
                     return false;
                 }
 
-                if (Storage::disk('public')->put($save_to . $save_as, $fileContents)) {
+                if (Storage::disk($disk)->put($save_to . $save_as, $fileContents)) {
 
                     $file = self::createNew($connection->id, $file_to_download, $save_to, $save_as);
 
-                    $mime = Storage::disk('public')->mimeType($save_to . $save_as);
+                    $mime = Storage::disk($disk)->mimeType($save_to . $save_as);
                     if (str_starts_with($mime, 'text/')) {
                         ReadFile::createNew($file->id);
                     }
@@ -219,22 +219,25 @@ class File extends Model
     }
 
 
-    public static function moveFile(File $file, string $move_to): bool
+    public static function moveFile(File $file, string $move_to, string $disk = ''): bool
     {
         try {
-            $current_path = $file->saved_to . '/' . $file->saved_as;
-            if (!Storage::disk('public')->exists($current_path)) {
+            if (!Storage::disk($file->disk)->exists($file->saved_to . '/' . $file->saved_as)) {
                 return false;
             }
 
             $new_path = $move_to . '/' . $file->saved_as;
 
-            if (Storage::disk('public')->exists($new_path)) {
+            if ($disk === '') {
+                $disk = $file->disk;
+            }
+
+            if (Storage::disk($disk)->exists($new_path)) {
                 return false;
             }
 
-            if (Storage::disk('public')->move($current_path, $new_path)) {
-                $file->update(['saved_to' => $move_to]);
+            if (Storage::disk($disk)->move($file->saved_to . '/' . $file->saved_as, $new_path)) {
+                $file->update(['saved_to' => $move_to, 'disk' => $disk]);
                 return true;
             }
 
@@ -245,21 +248,24 @@ class File extends Model
         }
     }
 
-    public static function copyFile(File $file, string $copy_to): bool
+    public static function copyFile(File $file, string $copy_to, string $disk = ''): bool
     {
         try {
-            $current_path = $file->saved_to . '/' . $file->saved_as;
-            if (!Storage::disk('public')->exists($current_path)) {
+            if (!Storage::disk($file->disk)->exists($file->saved_to . '/' . $file->saved_as)) {
                 return false;
             }
 
             $new_path = $copy_to . '/' . $file->saved_as;
 
-            if (Storage::disk('public')->exists($new_path)) {
+            if ($disk === '') {
+                $disk = $file->disk;
+            }
+
+            if (Storage::disk($disk)->exists($new_path)) {
                 return false;
             }
 
-            if (Storage::disk('public')->move($current_path, $new_path)) {
+            if (Storage::disk($disk)->move($file->saved_to . '/' . $file->saved_as, $new_path)) {
                 return true;
             }
 
@@ -273,17 +279,17 @@ class File extends Model
     public static function renameFile(File $file, string $new_name): bool
     {
         try {
-            if (!Storage::disk('public')->exists($file->saved_to . '/' . $file->saved_as)) {
+            if (!Storage::disk($file->disk)->exists($file->saved_to . '/' . $file->saved_as)) {
                 return false;
             }
 
             $new_path = dirname($file->saved_to) . '/' . $new_name;
 
-            if (Storage::disk('public')->exists($new_path)) {
+            if (Storage::disk($file->disk)->exists($new_path)) {
                 return false;
             }
 
-            if (Storage::disk('public')->move($file->saved_to . '/' . $file->saved_as, $new_path)) {
+            if (Storage::disk($file->disk)->move($file->saved_to . '/' . $file->saved_as, $new_path)) {
                 $file->update(['saved_as' => $new_name]);
                 return true;
             }
@@ -298,11 +304,11 @@ class File extends Model
     public static function deleteFile(File $file): bool
     {
         try {
-            if (!Storage::disk('public')->exists($file->saved_to . '/' . $file->saved_as)) {
+            if (!Storage::disk($file->disk)->exists($file->saved_to . '/' . $file->saved_as)) {
                 return false;
             }
 
-            if (Storage::disk('public')->delete($file->saved_to . '/' . $file->saved_as)) {
+            if (Storage::disk($file->disk)->delete($file->saved_to . '/' . $file->saved_as)) {
                 $file->delete();
                 return true;
             }
@@ -318,17 +324,17 @@ class File extends Model
     {
         try {
             $file_path = $file->saved_to . '/' . $file->saved_as;
-            if (!Storage::disk('public')->exists($file_path)) {
+            if (!Storage::disk($file->disk)->exists($file_path)) {
                 return false;
             }
 
-            $mimeType = Storage::disk('public')->mimeType($file_path);
+            $mimeType = Storage::disk($file->disk)->mimeType($file_path);
 
             if ($save_as === '') {
                 $save_as = basename($file_path);
             }
 
-            return Storage::disk('public')->download($file_path, $save_as, ['Content-Type' => $mimeType]);
+            return Storage::disk($file->disk)->download($file_path, $save_as, ['Content-Type' => $mimeType]);
         } catch (\Exception $exception) {
             Log::debug($exception->getMessage());
             abort(404, 'File not found.');

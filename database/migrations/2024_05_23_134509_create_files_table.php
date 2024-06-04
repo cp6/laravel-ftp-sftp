@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('connection_id');
             $table->integer('size_kb')->nullable()->default(null);
             $table->string('ext')->nullable()->default(null);
+            $table->string('disk',64);
             $table->string('saved_to')->nullable()->default(null);
             $table->string('saved_as')->nullable()->default(null);
             $table->string('original_dir')->nullable()->default(null);
