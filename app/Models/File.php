@@ -123,6 +123,43 @@ class File extends Model
         return false;
     }
 
+    public static function renameFtpFile(Connection $connection, string $current_path, string $new_name): bool
+    {
+        try {
+            $ftp = ftp_connect($connection->host, $connection->port, $connection->timeout);
+            if (false === $ftp) {
+                return false;
+            }
+
+            $decrypted_password = (!is_null($connection->password)) ? Crypt::decryptString($connection->password) : '';
+
+            if (@ftp_login($ftp, $connection->username, $decrypted_password)) {
+                $new_path = dirname($current_path) . '/' . $new_name;
+
+                $file_exists = @ftp_size($ftp, $new_path) !== -1;
+
+                if ($file_exists) {
+                    return false;
+                }
+
+                if (@ftp_rename($ftp, $current_path, $new_path)) {
+                    ftp_close($ftp);
+                    return true;
+                }
+
+                return false;
+            }
+
+            return false;
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+            if ($ftp) {
+                ftp_close($ftp);
+            }
+            return false;
+        }
+    }
+
     public static function renameSftpFile(Connection $connection, string $current_path, string $new_name): bool
     {
         try {
