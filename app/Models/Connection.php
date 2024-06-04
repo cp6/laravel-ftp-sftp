@@ -31,16 +31,24 @@ class Connection extends Model
         });
     }
 
-    public static function makeSftpConnectionPassword(string $host, int $port, string $user, ?string $password = '', int $timeout = 8, ?string $key = ''): ?SFTP
+    public static function makeSftpConnection(string $host, int $port, string $user, ?string $password = '', int $timeout = 8, ?string $key = ''): ?SFTP
     {
         $sftp = new SFTP($host, $port, $timeout);
 
         try {
-            if (!is_null($password)) {//Has password set
-                $password = Crypt::decryptString($password);
+            if (!is_null($password) && is_null($key)) {
+                $sftp->login($user, Crypt::decryptString($password));//Has password set
+            } elseif (is_null($password) && is_null($key)) {
+                $sftp->login($user);//Has no password or key set
+            } elseif (!is_null($key) && !is_null($password)) {
+                $sftp->login($user, Crypt::decryptString($key), Crypt::decryptString($password));//Has key set
+            } else {
+                $sftp->login($user, Crypt::decryptString($key));//Has key set
             }
-            $sftp->login($user, $password);
         } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+            Log::debug($sftp->getLastError());
+            Log::debug($sftp->getLastSFTPError());
             return null;
         }
 
@@ -143,7 +151,7 @@ class Connection extends Model
 
     public static function listSftpDirectories(Connection $connection, string $path = ''): ?array
     {
-        $sftp = self::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, $connection->password);
+        $sftp = self::makeSftpConnection($connection->host, $connection->port, $connection->username, $connection->password, $connection->timeout, $connection->key);
 
         if (!$sftp) {
             return null;
@@ -166,7 +174,7 @@ class Connection extends Model
 
     public static function listSftpFiles(Connection $connection, string $path = ''): ?array
     {
-        $sftp = self::makeSftpConnectionPassword($connection->host, $connection->port, $connection->username, $connection->password);
+        $sftp = self::makeSftpConnection($connection->host, $connection->port, $connection->username, $connection->password, $connection->timeout, $connection->key);
 
         if (!$sftp) {
             return null;
@@ -192,6 +200,7 @@ class Connection extends Model
 
             return $fileList;
         } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
             return null;
         }
     }
