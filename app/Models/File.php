@@ -328,4 +328,9 @@ class File extends Model
         }
     }
 
+    public static function uploadFile(Connection $connection, string $local_disk, string $local_filepath, string $upload_as): bool
+    {
+
+    }
+
 }
