@@ -123,4 +123,30 @@ class File extends Model
         return false;
     }
 
+    public static function renameSftpFile(Connection $connection, string $current_path, string $new_name): bool
+    {
+        try {
+            $sftp = new SFTP($connection->host, $connection->port, $connection->timeout);
+            $decrypted_password = (!is_null($connection->password)) ? Crypt::decryptString($connection->password) : '';
+
+            if ($sftp->login($connection->username, $decrypted_password)) {
+                $new_path = dirname($current_path) . '/' . $new_name;
+
+                if ($sftp->file_exists($new_path)) {
+                    return false;
+                }
+
+                if ($sftp->rename($current_path, $new_path)) {
+                    return true;
+                }
+
+            }
+
+            return false;
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+            return false;
+        }
+    }
+
 }
