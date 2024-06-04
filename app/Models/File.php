@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use phpseclib3\Net\SFTP;
 
 class File extends Model
 {
@@ -83,4 +84,50 @@ class File extends Model
         }
         return false;
     }
+
+    public static function downloadSftpFile(Connection $connection, string $file_to_download, string $save_to, string $save_as): bool
+    {
+        try {
+            $sftp = new SFTP($connection->host, $connection->port, $connection->timeout);
+            $decrypted_password = (!is_null($connection->password)) ? Crypt::decryptString($connection->password) : '';
+
+            if ($sftp->login($connection->username, $decrypted_password)) {
+                $fileContents = $sftp->get($file_to_download);
+
+                if ($fileContents === false) {
+                    return false;
+                }
+
+                Storage::disk('public')->put($save_to . $save_as, $fileContents);
+
+                $file = new File();
+                $file->sid = Str::random(12);
+                $file->connection_id = $connection->id;
+                $file->user_id = Auth::id();
+                $file->size_kb = Storage::disk('public')->size($save_to . $save_as) / 1024;
+                $file->ext = pathinfo($file_to_download, PATHINFO_EXTENSION);
+                $file->original_name = basename($file_to_download);
+                $file->original_dir = dirname($file_to_download);
+                $file->saved_to = $save_to;
+                $file->saved_as = $save_as;
+                $file->save();
+
+                $mime = Storage::disk('public')->mimeType($save_to . $save_as);
+                if (str_starts_with($mime, 'text/') || str_starts_with($mime, 'application/')) {
+                    $read_file = new ReadFile();
+                    $read_file->file_id = $file->id;
+                    $read_file->save();
+                }
+
+                return true;
+            }
+
+            return false;
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+        }
+
+        return false;
+    }
+
 }
