@@ -108,7 +108,6 @@ class File extends Model
 
                     $mime = Storage::disk('public')->mimeType($save_to . $save_as);
                     if (str_starts_with($mime, 'text/')) {
-                        Log::debug(5);
                         ReadFile::createNew($file->id);
                     }
 
