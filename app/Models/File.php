@@ -68,10 +68,8 @@ class File extends Model
                 $file->save();
 
                 $mime = Storage::disk('public')->mimeType($save_to . $save_as);
-                if (str_starts_with($mime, 'text/') || str_starts_with($mime, 'application/')) {
-                   $read_file = new ReadFile();
-                   $read_file->file_id = $file->id;
-                   $read_file->save();
+                if (str_starts_with($mime, 'text/')) {
+                    ReadFile::createNew($file->id);
                 }
 
                 return true;
@@ -113,10 +111,8 @@ class File extends Model
                 $file->save();
 
                 $mime = Storage::disk('public')->mimeType($save_to . $save_as);
-                if (str_starts_with($mime, 'text/') || str_starts_with($mime, 'application/')) {
-                    $read_file = new ReadFile();
-                    $read_file->file_id = $file->id;
-                    $read_file->save();
+                if (str_starts_with($mime, 'text/')) {
+                    ReadFile::createNew($file->id);
                 }
 
                 return true;
