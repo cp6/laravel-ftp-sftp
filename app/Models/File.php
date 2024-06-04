@@ -212,4 +212,100 @@ class File extends Model
     }
 
 
+    public static function moveFile(File $file, string $move_to): bool
+    {
+        try {
+            $current_path = $file->saved_to . '/' . $file->saved_as;
+            if (!Storage::disk('public')->exists($current_path)) {
+                return false;
+            }
+
+            $new_path = $move_to . '/' . $file->saved_as;
+
+            if (Storage::disk('public')->exists($new_path)) {
+                return false;
+            }
+
+            if (Storage::disk('public')->move($current_path, $new_path)) {
+                $file->update(['saved_to' => $move_to]);
+                return true;
+            }
+
+            return false;
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+            return false;
+        }
+    }
+
+    public static function copyFile(File $file, string $copy_to): bool
+    {
+        try {
+            $current_path = $file->saved_to . '/' . $file->saved_as;
+            if (!Storage::disk('public')->exists($current_path)) {
+                return false;
+            }
+
+            $new_path = $copy_to . '/' . $file->saved_as;
+
+            if (Storage::disk('public')->exists($new_path)) {
+                return false;
+            }
+
+            if (Storage::disk('public')->move($current_path, $new_path)) {
+                return true;
+            }
+
+            return false;
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+            return false;
+        }
+    }
+
+    public static function renameFile(File $file, string $new_name): bool
+    {
+        try {
+            if (!Storage::disk('public')->exists($file->saved_to . '/' . $file->saved_as)) {
+                return false;
+            }
+
+            $new_path = dirname($file->saved_to) . '/' . $new_name;
+
+            if (Storage::disk('public')->exists($new_path)) {
+                return false;
+            }
+
+            if (Storage::disk('public')->move($file->saved_to . '/' . $file->saved_as, $new_path)) {
+                $file->update(['saved_as' => $new_name]);
+                return true;
+            }
+
+            return false;
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+            return false;
+        }
+    }
+
+    public static function deleteFile(File $file): bool
+    {
+        try {
+            if (!Storage::disk('public')->exists($file->saved_to . '/' . $file->saved_as)) {
+                return false;
+            }
+
+            if (Storage::disk('public')->delete($file->saved_to . '/' . $file->saved_as)) {
+                $file->delete();
+                return true;
+            }
+
+            return false;
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+            return false;
+        }
+    }
+
+
 }
