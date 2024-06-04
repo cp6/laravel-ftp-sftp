@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
@@ -307,5 +308,25 @@ class File extends Model
         }
     }
 
+    public static function downloadFile(File $file, string $save_as = '')
+    {
+        try {
+            $file_path = $file->saved_to . '/' . $file->saved_as;
+            if (!Storage::disk('public')->exists($file_path)) {
+                return false;
+            }
+
+            $mimeType = Storage::disk('public')->mimeType($file_path);
+
+            if ($save_as === '') {
+                $save_as = basename($file_path);
+            }
+
+            return Storage::disk('public')->download($file_path, $save_as, ['Content-Type' => $mimeType]);
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+            abort(404, 'File not found.');
+        }
+    }
 
 }
