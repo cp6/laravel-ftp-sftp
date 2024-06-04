@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\UserOwnedScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +16,12 @@ class Connection extends Model
     use HasFactory;
 
     protected $fillable = ['is_sftp', 'host', 'username', 'password', 'port', 'timeout', 'log_actions', 'key'];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+        static::addGlobalScope(new UserOwnedScope());
+    }
 
     protected static function booted(): void
     {

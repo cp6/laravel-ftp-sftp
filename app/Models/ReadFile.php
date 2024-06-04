@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\UserOwnedScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
@@ -13,6 +14,12 @@ class ReadFile extends Model
     use HasFactory;
 
     protected $fillable = ['file_id', 'last_line_read', 'total_lines'];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+        static::addGlobalScope(new UserOwnedScope());
+    }
 
     public function file(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {

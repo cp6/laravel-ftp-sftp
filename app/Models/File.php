@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\UserOwnedScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +19,12 @@ class File extends Model
     protected $fillable = ['size_kb', 'ext', 'saved_to', 'saved_as', 'original_dir', 'original_name'];
 
     protected $with = ['connection', 'read'];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+        static::addGlobalScope(new UserOwnedScope());
+    }
 
     public function read(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
