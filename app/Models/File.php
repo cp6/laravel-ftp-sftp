@@ -218,25 +218,27 @@ class File extends Model
         }
     }
 
+    public static function fileExists(File $file): bool
+    {
+        return Storage::disk($file->disk)->exists($file->saved_to . '/' . $file->saved_as);
+    }
 
     public static function moveFile(File $file, string $move_to, string $disk = ''): bool
     {
         try {
-            if (!Storage::disk($file->disk)->exists($file->saved_to . '/' . $file->saved_as)) {
+            if (!self::fileExists($file)) {
                 return false;
             }
-
-            $new_path = $move_to . '/' . $file->saved_as;
 
             if ($disk === '') {
                 $disk = $file->disk;
             }
 
-            if (Storage::disk($disk)->exists($new_path)) {
+            if (Storage::disk($disk)->exists($move_to . '/' . $file->saved_as)) {
                 return false;
             }
 
-            if (Storage::disk($disk)->move($file->saved_to . '/' . $file->saved_as, $new_path)) {
+            if (Storage::disk($disk)->move($file->saved_to . '/' . $file->saved_as, $move_to . '/' . $file->saved_as)) {
                 $file->update(['saved_to' => $move_to, 'disk' => $disk]);
                 return true;
             }
@@ -251,21 +253,19 @@ class File extends Model
     public static function copyFile(File $file, string $copy_to, string $disk = ''): bool
     {
         try {
-            if (!Storage::disk($file->disk)->exists($file->saved_to . '/' . $file->saved_as)) {
+            if (!self::fileExists($file)) {
                 return false;
             }
-
-            $new_path = $copy_to . '/' . $file->saved_as;
 
             if ($disk === '') {
                 $disk = $file->disk;
             }
 
-            if (Storage::disk($disk)->exists($new_path)) {
+            if (Storage::disk($disk)->exists($copy_to . '/' . $file->saved_as)) {
                 return false;
             }
 
-            if (Storage::disk($disk)->move($file->saved_to . '/' . $file->saved_as, $new_path)) {
+            if (Storage::disk($disk)->move($file->saved_to . '/' . $file->saved_as, $copy_to . '/' . $file->saved_as)) {
                 return true;
             }
 
@@ -279,18 +279,16 @@ class File extends Model
     public static function renameFile(File $file, string $new_name): bool
     {
         try {
-            if (!Storage::disk($file->disk)->exists($file->saved_to . '/' . $file->saved_as)) {
+            if (!self::fileExists($file)) {
                 return false;
             }
 
-            $new_path = dirname($file->saved_to) . '/' . $new_name;
-
-            if (Storage::disk($file->disk)->exists($new_path)) {
+            if (Storage::disk($file->disk)->exists(dirname($file->saved_to) . '/' . $new_name)) {
                 return false;
             }
 
-            if (Storage::disk($file->disk)->move($file->saved_to . '/' . $file->saved_as, $new_path)) {
-                $file->update(['saved_as' => $new_name]);
+            if (Storage::disk($file->disk)->move($file->saved_to . '/' . $file->saved_as, dirname($file->saved_to) . '/' . $new_name)) {
+                $file->update(['saved_as' => dirname($file->saved_to) . '/' . $new_name]);
                 return true;
             }
 
@@ -304,7 +302,7 @@ class File extends Model
     public static function deleteFile(File $file): bool
     {
         try {
-            if (!Storage::disk($file->disk)->exists($file->saved_to . '/' . $file->saved_as)) {
+            if (!self::fileExists($file)) {
                 return false;
             }
 
