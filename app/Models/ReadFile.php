@@ -19,6 +19,13 @@ class ReadFile extends Model
         return $this->belongsTo(File::class, 'file_id', 'id');
     }
 
+    public static function createNew(int $file_id): bool
+    {
+        $read_file = new ReadFile();
+        $read_file->file_id = $file_id;
+        return $read_file->save();
+    }
+
     public static function readLinesFtp(Connection $connection, string $file_path, int $start = 0, int $end = 100): ?array
     {
         (!is_null($connection->password)) ? $decrypted_password = Crypt::decryptString($connection->password) : $decrypted_password = '';
