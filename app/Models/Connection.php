@@ -175,7 +175,10 @@ class Connection extends Model
                     $stat = $sftp->stat($filePath);
                     $fileList[] = [
                         'name' => $file,
-                        'size' => $stat['size']
+                        'size' => $stat['size'],
+                        'size_kb' => $stat['size'] / 1024,
+                        'last_access' => $stat['atime'],
+                        'last_modified' => $stat['mtime'],
                     ];
                 }
             }
