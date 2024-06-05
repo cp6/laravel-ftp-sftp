@@ -35,7 +35,7 @@ class File extends Model
         return $this->belongsTo(Connection::class, 'connection_id', 'id');
     }
 
-    public static function createNew(int $connection_id, string $file_to_download, string $save_to, string $save_as): File
+    public static function createNew(int $connection_id, string $file_to_download, string $disk, string $save_to, string $save_as): File
     {
         $file = new File();
         $file->sid = Str::random(12);
@@ -45,6 +45,7 @@ class File extends Model
         $file->ext = pathinfo($file_to_download, PATHINFO_EXTENSION);
         $file->original_name = basename($file_to_download);
         $file->original_dir = dirname($file_to_download);
+        $file->disk = $disk;
         $file->saved_to = $save_to;
         $file->saved_as = $save_as;
         $file->save();
@@ -73,7 +74,7 @@ class File extends Model
                 fclose($handle);
 
                 if (Storage::disk($disk)->put($save_to . $save_as, $fileContents)) {
-                    $file = self::createNew($connection->id, $file_to_download, $save_to, $save_as);
+                    $file = self::createNew($connection->id, $file_to_download, $disk, $save_to, $save_as);
 
                     $mime = Storage::disk($disk)->mimeType($save_to . $save_as);
                     if (str_starts_with($mime, 'text/')) {
@@ -107,7 +108,7 @@ class File extends Model
 
                 if (Storage::disk($disk)->put($save_to . $save_as, $fileContents)) {
 
-                    $file = self::createNew($connection->id, $file_to_download, $save_to, $save_as);
+                    $file = self::createNew($connection->id, $file_to_download, $disk, $save_to, $save_as);
 
                     $mime = Storage::disk($disk)->mimeType($save_to . $save_as);
                     if (str_starts_with($mime, 'text/')) {
