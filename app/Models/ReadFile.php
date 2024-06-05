@@ -130,11 +130,7 @@ class ReadFile extends Model
             return null;
         }
 
-        if (!isset($file->read->last_line_read)) {
-            $file_to_read->seek(0);
-        } else {
-            $file_to_read->seek($file->read->last_line_read - 1);
-        }
+        (!isset($file->read->last_line_read)) ? $file_to_read->seek(0) : $file_to_read->seek($file->read->last_line_read - 1);
 
         $lines = [];
 
