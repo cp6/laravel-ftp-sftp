@@ -6,7 +6,6 @@ use App\Models\Scopes\UserOwnedScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -27,7 +26,7 @@ class File extends Model
 
     public function read(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
-        return $this->hasOne(ReadFile::class, 'file_id', 'id');
+        return $this->hasOne(ReadFile::class, 'file_id', 'id')->withoutGlobalScope(UserOwnedScope::class);
     }
 
     public function connection(): \Illuminate\Database\Eloquent\Relations\BelongsTo
