@@ -32,7 +32,7 @@ class ReadFile extends Model
         return $read_file->save();
     }
 
-    public static function readLinesFtp(Connection $connection, string $file_path, int $start = 0, int $end = 100): ?array
+    public static function readLinesFtp(Connection $connection, string $file_path, int $start = 0, int $num_lines = 100): ?array
     {
         $ftp_con = Connection::makeFtpConnection($connection->host, $connection->port, $connection->username, $connection->password);
 
@@ -58,10 +58,10 @@ class ReadFile extends Model
                     break;
                 }
                 $lineCount++;
-                if ($lineCount >= $start && $lineCount <= $end) {
+                if ($lineCount >= $start && $lineCount < $start + $num_lines) {
                     $lines[] = $line;
                 }
-                if ($lineCount > $end) {
+                if ($lineCount >= $start + $num_lines) {
                     break 2;
                 }
             }
