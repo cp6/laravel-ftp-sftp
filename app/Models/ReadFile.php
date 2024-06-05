@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use SplFileObject;
 
 class ReadFile extends Model
 {
@@ -101,6 +102,53 @@ class ReadFile extends Model
 
             $read_file->update(['last_line_read' => $line_number]);
         }
+
+        return $lines;
+    }
+
+    public static function setSplFile(File $file): ?SplFileObject
+    {
+        if (!File::fileExists($file)) {
+            return null;
+        }
+
+        try {
+            $file_to_read = new SplFileObject(Storage::disk($file->disk)->path($file->saved_to . '/' . $file->saved_as), 'r');
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+            return null;
+        }
+
+        return $file_to_read;
+    }
+
+    public static function readLines(File $file, int $number_of_lines = 100): ?array
+    {
+        $file_to_read = self::setSplFile($file);
+
+        if (is_null($file_to_read)) {
+            return null;
+        }
+
+        if (!isset($file->read->last_line_read)) {
+            $file_to_read->seek(0);
+        } else {
+            $file_to_read->seek($file->read->last_line_read - 1);
+        }
+
+        $lines = [];
+
+        for ($line_number = 0; $line_number < $number_of_lines && !$file_to_read->eof(); $line_number++) {
+            $lines[] = $file_to_read->current();
+            $file_to_read->next();
+        }
+
+        $file_to_read->seek($file_to_read->getSize());
+
+        $file->read->update([
+            'last_line_read' => $line_number + $file->read->last_line_read,
+            'total_lines' => ($file_to_read->key() + 1)
+        ]);
 
         return $lines;
     }
