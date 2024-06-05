@@ -153,5 +153,34 @@ class ReadFile extends Model
         return $lines;
     }
 
+    public static function readLinesFromTo(File $file, int $from = 0, int $to = 100): ?array
+    {
+        $file_to_read = self::setSplFile($file);
+
+        if (is_null($file_to_read)) {
+            return null;
+        }
+
+    }
+
+    public static function readLastLines(File $file, int $amount = 20): ?array
+    {
+        $file_to_read = self::setSplFile($file);
+
+        if (is_null($file_to_read)) {
+            return null;
+        }
+
+    }
+
+    public static function readOneLine(File $file, int $line = 1): ?array
+    {
+        $file_to_read = self::setSplFile($file);
+
+        if (is_null($file_to_read)) {
+            return null;
+        }
+
+    }
 
 }
