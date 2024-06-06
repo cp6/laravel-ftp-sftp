@@ -489,7 +489,7 @@ class File extends Model
         }
 
         $this->load_file->seek($line);
-        return $this->load_file->current();
+        return $this->line_contents[] = [$this->load_file->current()];
     }
 
 }
