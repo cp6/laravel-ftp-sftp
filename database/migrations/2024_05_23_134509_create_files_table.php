@@ -23,6 +23,8 @@ return new class extends Migration
             $table->string('saved_as')->nullable()->default(null);
             $table->string('original_dir')->nullable()->default(null);
             $table->string('original_name')->nullable()->default(null);
+            $table->integer('last_line_read')->nullable()->default(null);
+            $table->integer('total_lines')->nullable()->default(null);
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('connection_id')->references('id')->on('connections')->onDelete('cascade');

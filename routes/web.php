@@ -25,6 +25,7 @@ Route::middleware('auth')->group(function () {
 
 
     Route::get('/file/{file}', [FileController::class, 'show'])->name('file.show');
+
 });
 
 require __DIR__ . '/auth.php';
