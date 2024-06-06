@@ -15,6 +15,10 @@ class File extends Model
 {
     use HasFactory;
 
+    public ?SplFileObject $load_file;
+
+    public array $line_contents = [];
+
     protected $fillable = ['size_kb', 'ext', 'disk', 'saved_to', 'saved_as', 'original_dir', 'original_name', 'last_line_read', 'total_lines'];
 
     protected $with = ['connection'];
@@ -390,87 +394,75 @@ class File extends Model
         return $lines;
     }
 
-    public static function setSplFile(File $file): ?SplFileObject
+    protected function setSplFile(File $file): ?SplFileObject
     {
         if (!self::fileExists($file)) {
             return null;
         }
 
         try {
-            $file_to_read = new SplFileObject(Storage::disk($file->disk)->path($file->saved_to . '/' . $file->saved_as), 'r');
+            $this->load_file = new SplFileObject(Storage::disk($file->disk)->path($file->saved_to . '/' . $file->saved_as), 'r');
         } catch (\Exception $exception) {
             Log::debug($exception->getMessage());
             return null;
         }
 
-        return $file_to_read;
+        return $this->load_file;
     }
 
-    public static function readLines(File $file, int $number_of_lines = 100): ?array
+    public function readLines(File $file, int $number_of_lines = 100): ?array
     {
-        $file_to_read = self::setSplFile($file);
-
-        if (is_null($file_to_read)) {
+        if (is_null($this->setSplFile($file))) {
             return null;
         }
 
-        (is_null($file->last_line_read)) ? $file_to_read->seek(0) : $file_to_read->seek($file->last_line_read - 1);
+        (is_null($file->last_line_read)) ? $this->load_file->seek(0) : $this->load_file->seek($file->last_line_read - 1);
 
-        $lines = [];
-
-        for ($line_number = 0; $line_number < $number_of_lines && !$file_to_read->eof(); $line_number++) {
-            $lines[] = $file_to_read->current();
-            $file_to_read->next();
+        for ($line_number = 0; $line_number < $number_of_lines && !$this->load_file->eof(); $line_number++) {
+            $this->line_contents[] = $this->load_file->current();
+            $this->load_file->next();
         }
 
-        $file_to_read->seek($file_to_read->getSize());
+        $this->load_file->seek($this->load_file->getSize());
 
         $file->update([
             'last_line_read' => $line_number + $file->last_line_read,
-            'total_lines' => ($file_to_read->key() + 1)
+            'total_lines' => ($this->load_file->key() + 1)
         ]);
 
-        return $lines;
+        return $this->line_contents;
     }
 
-    public static function readLinesFromTo(File $file, int $from = 0, int $to = 100): ?array
+    public function readLinesFromTo(File $file, int $from = 0, int $to = 100): ?array
     {
-        $file_to_read = self::setSplFile($file);
-
-        if (is_null($file_to_read)) {
+        if (is_null($this->setSplFile($file))) {
             return null;
         }
 
-        $lines = [];
+        $this->load_file->seek($from);
 
-        $file_to_read->seek($from);
-
-        for ($line_number = $from; $line_number < $to && !$file_to_read->eof(); $line_number++) {
-            $lines[] = $file_to_read->current();
-            $file_to_read->next();
+        for ($line_number = $from; $line_number < $to && !$this->load_file->eof(); $line_number++) {
+            $this->line_contents[] = $this->load_file->current();
+            $this->load_file->next();
         }
 
-        return $lines;
+        return $this->line_contents;
     }
 
-    public static function readLastLines(File $file, int $amount = 20): ?array
+    public function readLastLines(File $file, int $amount = 20): ?array
     {
-        $file_to_read = self::setSplFile($file);
-
-        if (is_null($file_to_read)) {
+        if (is_null($this->setSplFile($file))) {
             return null;
         }
 
-        $file_to_read->seek($file_to_read->getSize());
+        $this->load_file->seek($this->load_file->getSize());
 
-        $total_lines = ($file_to_read->key() + 1);
+        $total_lines = ($this->load_file->key() + 1);
         $read_from = ($total_lines - $amount);
 
         if ($amount > $total_lines) {
             $read_from = 0;
         }
-
-        $lines = [];
 
         for ($i = $read_from; $i <= $total_lines; $i++) {
 
@@ -478,28 +470,26 @@ class File extends Model
                 break;
             }
 
-            $file_to_read->seek($i);
+            $this->load_file->seek($i);
 
-            $lines[] = $file_to_read->current();
+            $this->line_contents[] = $this->load_file->current();
 
-            if (!$file_to_read->current()) {//End of file
+            if (!$this->load_file->current()) {//End of file
                 break;
             }
         }
 
-        return array_reverse($lines);
+        return array_reverse($this->line_contents);
     }
 
-    public static function readOneLine(File $file, int $line = 1): ?array
+    public function readOneLine(File $file, int $line = 1): ?array
     {
-        $file_to_read = self::setSplFile($file);
-
-        if (is_null($file_to_read)) {
+        if (is_null($this->setSplFile($file))) {
             return null;
         }
 
-        $file_to_read->seek($line);
-        return $file_to_read->current();
+        $this->load_file->seek($line);
+        return $this->load_file->current();
     }
 
 }
