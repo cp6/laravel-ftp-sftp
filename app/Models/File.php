@@ -318,7 +318,59 @@ class File extends Model
 
     public static function uploadFile(Connection $connection, string $local_disk, string $local_filepath, string $upload_as): bool
     {
+        if ($connection->is_sftp === 1) {
+            try {
+                $sftp = Connection::makeSftpConnection($connection->host, $connection->port, $connection->username, $connection->password, $connection->timeout, $connection->key);
+                if ($sftp) {
+                    $fileContents = Storage::disk($local_disk)->get($local_filepath);
 
+                    if ($fileContents === false) {
+                        return false;
+                    }
+
+                    if ($sftp->put($upload_as, $fileContents)) {
+                        return true;
+                    }
+                }
+            } catch (\Exception $exception) {
+                Log::debug($exception->getMessage());
+            }
+            return false;
+        }
+
+        try {
+            $con = Connection::makeFtpConnection($connection->host, $connection->port, $connection->username, $connection->password, $connection->timeout);
+            if (false === $con) {
+                return false;
+            }
+
+            if ($con) {
+                $fileContents = Storage::disk($local_disk)->get($local_filepath);
+                if ($fileContents === false) {
+                    ftp_close($con);
+                    return false;
+                }
+
+                $handle = fopen('php://temp', 'rb+');
+                fwrite($handle, $fileContents);
+                rewind($handle);
+
+                if (!ftp_fput($con, $upload_as, $handle, FTP_BINARY)) {
+                    fclose($handle);
+                    ftp_close($con);
+                    return false;
+                }
+
+                fclose($handle);
+                ftp_close($con);
+
+                return true;
+            }
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+        }
+
+        return false;
     }
 
     public static function readLinesFtp(Connection $connection, string $file_path, int $start = 0, int $num_lines = 100): ?array
