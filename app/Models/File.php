@@ -70,11 +70,6 @@ class File extends Model
 
                 if (Storage::disk($disk)->put($save_to . $save_as, $fileContents)) {
                     $file = self::createNew($connection->id, $file_to_download, $disk, $save_to, $save_as);
-
-                    $mime = Storage::disk($disk)->mimeType($save_to . $save_as);
-                    if (str_starts_with($mime, 'text/')) {
-                        //ReadFile::createNew($file->id);
-                    }
                 }
 
                 ftp_close($con);
@@ -102,14 +97,7 @@ class File extends Model
                 }
 
                 if (Storage::disk($disk)->put($save_to . $save_as, $fileContents)) {
-
                     $file = self::createNew($connection->id, $file_to_download, $disk, $save_to, $save_as);
-
-                    $mime = Storage::disk($disk)->mimeType($save_to . $save_as);
-                    if (str_starts_with($mime, 'text/')) {
-                        //ReadFile::createNew($file->id);
-                    }
-
                 }
 
                 return true;
