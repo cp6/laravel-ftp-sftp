@@ -56,9 +56,6 @@ class File extends Model
     {
         try {
             $con = Connection::makeFtpConnection($connection->host, $connection->port, $connection->username, $connection->password);
-            if (false === $con) {
-                return false;
-            }
 
             if ($con) {
                 $handle = fopen('php://temp', 'wb+');
@@ -118,9 +115,6 @@ class File extends Model
     {
         try {
             $ftp = Connection::makeFtpConnection($connection->host, $connection->port, $connection->username, $connection->password);
-            if (false === $ftp) {
-                return false;
-            }
 
             if ($ftp) {
                 $new_path = dirname($current_path) . '/' . $new_name;
@@ -169,6 +163,46 @@ class File extends Model
             Log::debug($exception->getMessage());
             return false;
         }
+    }
+
+    public static function deleteFtpFile(Connection $connection, string $file_to_delete): bool
+    {
+        try {
+            $ftp = Connection::makeFtpConnection($connection->host, $connection->port, $connection->username, $connection->password, $connection->timeout);
+
+            if ($ftp) {
+                if (ftp_delete($ftp, $file_to_delete)) {
+                    ftp_close($ftp);
+                    return true;
+                }
+
+                ftp_close($ftp);
+                return false;
+            }
+
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+        }
+
+        return false;
+    }
+
+    public static function deleteSftpFile(Connection $connection, string $file_to_delete): bool
+    {
+        try {
+            $sftp = Connection::makeSftpConnection($connection->host, $connection->port, $connection->username, $connection->password, $connection->timeout, $connection->key);
+
+            if ($sftp) {
+                if ($sftp->delete($file_to_delete)) {
+                    return true;
+                }
+                return false;
+            }
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+        }
+
+        return false;
     }
 
     public static function outputSftpFileToBrowser(Connection $connection, string $file_path)
@@ -295,7 +329,7 @@ class File extends Model
         }
     }
 
-    public static function downloadFile(File $file, string $save_as = '')
+    public static function downloadFileInBrowser(File $file, string $save_as = '')
     {
         try {
             $file_path = $file->saved_to . '/' . $file->saved_as;
@@ -321,6 +355,7 @@ class File extends Model
         if ($connection->is_sftp === 1) {
             try {
                 $sftp = Connection::makeSftpConnection($connection->host, $connection->port, $connection->username, $connection->password, $connection->timeout, $connection->key);
+
                 if ($sftp) {
                     $fileContents = Storage::disk($local_disk)->get($local_filepath);
 
@@ -340,9 +375,6 @@ class File extends Model
 
         try {
             $con = Connection::makeFtpConnection($connection->host, $connection->port, $connection->username, $connection->password, $connection->timeout);
-            if (false === $con) {
-                return false;
-            }
 
             if ($con) {
                 $fileContents = Storage::disk($local_disk)->get($local_filepath);
