@@ -441,6 +441,16 @@ class File extends Model
             return null;
         }
 
+        $lines = [];
+
+        $file_to_read->seek($from);
+
+        for ($line_number = $from; $line_number < $to && !$file_to_read->eof(); $line_number++) {
+            $lines[] = $file_to_read->current();
+            $file_to_read->next();
+        }
+
+        return $lines;
     }
 
     public static function readLastLines(File $file, int $amount = 20): ?array
@@ -461,6 +471,8 @@ class File extends Model
             return null;
         }
 
+        $file_to_read->seek($line);
+        return $file_to_read->current();
     }
 
 }
