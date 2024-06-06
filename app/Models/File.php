@@ -414,7 +414,7 @@ class File extends Model
             return null;
         }
 
-        (!isset($file->read->last_line_read)) ? $file_to_read->seek(0) : $file_to_read->seek($file->read->last_line_read - 1);
+        (is_null($file->last_line_read)) ? $file_to_read->seek(0) : $file_to_read->seek($file->last_line_read - 1);
 
         $lines = [];
 
@@ -425,8 +425,8 @@ class File extends Model
 
         $file_to_read->seek($file_to_read->getSize());
 
-        $file->read->update([
-            'last_line_read' => $line_number + $file->read->last_line_read,
+        $file->update([
+            'last_line_read' => $line_number + $file->last_line_read,
             'total_lines' => ($file_to_read->key() + 1)
         ]);
 
