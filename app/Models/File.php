@@ -461,6 +461,33 @@ class File extends Model
             return null;
         }
 
+        $file_to_read->seek($file_to_read->getSize());
+
+        $total_lines = ($file_to_read->key() + 1);
+        $read_from = ($total_lines - $amount);
+
+        if ($amount > $total_lines) {
+            $read_from = 0;
+        }
+
+        $lines = [];
+
+        for ($i = $read_from; $i <= $total_lines; $i++) {
+
+            if ($i === $total_lines) {//Stop
+                break;
+            }
+
+            $file_to_read->seek($i);
+
+            $lines[] = $file_to_read->current();
+
+            if (!$file_to_read->current()) {//End of file
+                break;
+            }
+        }
+
+        return array_reverse($lines);
     }
 
     public static function readOneLine(File $file, int $line = 1): ?array
