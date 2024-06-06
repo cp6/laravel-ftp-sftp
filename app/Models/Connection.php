@@ -143,6 +143,49 @@ class Connection extends Model
         return null;
     }
 
+    public static function listFtpFilesDirectories(Connection $connection, string $path = ''): ?array
+    {
+        try {
+            $con = self::makeFtpConnection($connection->host, $connection->port, $connection->username, $connection->password);
+
+            if ($con) {
+                $contents = ftp_nlist($con, $path);
+
+                $items = [];
+
+                foreach ($contents as $item) {
+                    $size = ftp_size($con, $item);
+
+                    if ($size !== -1) {
+                        $items[] = [
+                            'name' => $item,
+                            'size' => $size,
+                            'size_kb' => $size / 1024,
+                            'is_file' => true
+                        ];
+                    } else {
+                        $items[] = [
+                            'name' => $item,
+                            'size' => null,
+                            'size_kb' => null,
+                            'is_file' => false
+                        ];
+                    }
+                }
+
+                ftp_close($con);
+
+                return $items;
+            }
+
+            return null;
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+        }
+
+        return null;
+    }
+
     public static function listSftpDirectories(Connection $connection, string $path = ''): ?array
     {
         $sftp = self::makeSftpConnection($connection->host, $connection->port, $connection->username, $connection->password, $connection->timeout, $connection->key);
@@ -193,6 +236,49 @@ class Connection extends Model
             }
 
             return $fileList;
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+            return null;
+        }
+    }
+
+    public static function listSftpFilesDirectories(Connection $connection, string $path = ''): ?array
+    {
+        $sftp = self::makeSftpConnection($connection->host, $connection->port, $connection->username, $connection->password, $connection->timeout, $connection->key);
+
+        if (!$sftp) {
+            return null;
+        }
+
+        try {
+            $files = $sftp->nlist($path);
+
+            $list = [];
+            foreach ($files as $file) {
+                $filePath = $path . '/' . $file;
+                if ($sftp->is_file($filePath)) {
+                    $stat = $sftp->stat($filePath);
+                    $list[] = [
+                        'name' => $file,
+                        'size' => $stat['size'],
+                        'size_kb' => $stat['size'] / 1024,
+                        'last_access' => $stat['atime'],
+                        'last_modified' => $stat['mtime'],
+                        'is_file' => true
+                    ];
+                } else {
+                    $list[] = [
+                        'name' => $file,
+                        'size' => null,
+                        'size_kb' => null,
+                        'last_access' => null,
+                        'last_modified' => null,
+                        'is_file' => false
+                    ];
+                }
+            }
+
+            return $list;
         } catch (\Exception $exception) {
             Log::debug($exception->getMessage());
             return null;
