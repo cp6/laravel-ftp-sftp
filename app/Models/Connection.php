@@ -84,9 +84,6 @@ class Connection extends Model
     {
         try {
             $con = self::makeFtpConnection($connection->host, $connection->port, $connection->username, $connection->password);
-            if (false === $con) {
-                return null;
-            }
 
             if ($con) {
                 $contents = ftp_nlist($con, $path);
@@ -116,9 +113,6 @@ class Connection extends Model
     {
         try {
             $con = self::makeFtpConnection($connection->host, $connection->port, $connection->username, $connection->password);
-            if (false === $con) {
-                return null;
-            }
 
             if ($con) {
                 $contents = ftp_nlist($con, $path);
@@ -204,6 +198,5 @@ class Connection extends Model
             return null;
         }
     }
-
 
 }
