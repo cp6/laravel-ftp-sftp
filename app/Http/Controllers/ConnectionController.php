@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Connection;
+use App\Models\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Mockery\Exception;
-use phpseclib3\Net\SFTP;
 
 class ConnectionController extends Controller
 {
@@ -61,13 +61,13 @@ class ConnectionController extends Controller
         }
 
         //Try and connect with SFTP
-        $sftp = Connection::makeSftpConnection($connection->host, $connection->port, $connection->username, $connection->password, 4, $connection->key);
+        $sftp = Connection::makeSftpConnection($connection->host, $connection->port, $connection->username, $connection->password, 3, $connection->key);
 
         if (is_null($sftp)) {
             Log::debug('Connecting via SFTP failed');
 
             //Try and connect with FTP now
-            $ftp = Connection::makeFtpConnection($connection->host, $connection->port, $connection->username, $connection->password, 4);
+            $ftp = Connection::makeFtpConnection($connection->host, $connection->port, $connection->username, $connection->password, 3);
 
             if (is_null($ftp)) {
                 Log::debug('Connecting via FTP failed');
