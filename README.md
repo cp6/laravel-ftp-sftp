@@ -26,6 +26,3 @@ Used for creating SFTP and FTP connections
 
 <h3>File</h3>
 File actions such as downloading, uploading and deleting.
-
-<h3>ReadFile</h3>
-Reading lines in a file without downloading the whole file, this is great for larger files.
