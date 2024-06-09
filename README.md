@@ -25,4 +25,4 @@ Examples include:
 Used for creating SFTP and FTP connections
 
 <h3>File</h3>
-File actions such as downloading, uploading and deleting.
+File actions such as downloading, uploading, deleting, moving and reading.
