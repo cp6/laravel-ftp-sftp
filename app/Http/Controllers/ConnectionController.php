@@ -105,9 +105,20 @@ class ConnectionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Connection $connection)
+    public function update(Request $request, Connection $connection): bool
     {
-        //
+        $request->validate([
+            'host' => 'string|required|max:255',
+            'port' => 'integer|required|min:1|max:999999',
+            'username' => 'string|required|max:64',
+            'password' => 'string|nullable|sometimes',
+            'timeout' => 'integer|required|min:1|max:999',
+            'log_actions' => 'boolean|required',
+            'key' => 'string|nullable|sometimes'
+        ]);
+
+
+        return $connection->update($request->all());
     }
 
     /**
