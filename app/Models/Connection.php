@@ -143,6 +143,75 @@ class Connection extends Model
         return null;
     }
 
+    public static function listFtpCurrentDirectorySize(Connection $connection, string $path = ''): ?array
+    {
+        try {
+            $con = self::makeFtpConnection($connection->host, $connection->port, $connection->username, $connection->password);
+
+            if ($con) {
+                $contents = ftp_nlist($con, $path);
+
+                $files = $size = 0;
+                foreach ($contents as $item) {
+                    ++$files;
+                    $size += ftp_size($con, $item);
+                }
+
+                ftp_close($con);
+
+                return [
+                    'files' => $files,
+                    'size' => $size,
+                    'size_mb' => $size / 1024 / 1024,
+                    'size_gb' => $size / 1024 / 1024 / 1024,
+                ];
+            }
+
+            return null;
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+        }
+
+        return null;
+    }
+
+    public static function listSftpCurrentDirectorySize(Connection $connection, string $path = ''): ?array
+    {
+        try {
+            $sftp = self::makeSftpConnection($connection->host, $connection->port, $connection->username, $connection->password, $connection->timeout, $connection->key);
+
+            if (!$sftp) {
+                return null;
+            }
+
+            $contents = $sftp->nlist($path);
+
+            if ($contents === false) {
+                return null;
+            }
+
+            $files = $size = 0;
+            foreach ($contents as $item) {
+                if ($item !== '.' && $item !== '..') {
+                    ++$files;
+                    $size += $sftp->filesize($path . '/' . $item);
+                }
+            }
+
+            return [
+                'files' => $files,
+                'size' => $size,
+                'size_mb' => $size / 1024 / 1024,
+                'size_gb' => $size / 1024 / 1024 / 1024,
+            ];
+
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+        }
+
+        return null;
+    }
+
     public static function listFtpFilesDirectories(Connection $connection, string $path = ''): ?array
     {
         try {
