@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Connection;
-use App\Models\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
@@ -105,7 +104,7 @@ class ConnectionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Connection $connection): bool
+    public function update(Request $request, Connection $connection): \Illuminate\Http\RedirectResponse
     {
         $request->validate([
             'host' => 'string|required|max:255',
@@ -117,15 +116,39 @@ class ConnectionController extends Controller
             'key' => 'string|nullable|sometimes'
         ]);
 
+        $password = (!is_null($request->password)) ? Crypt::encryptString($request->password) : null;
+        $key = (!is_null($request->key)) ? Crypt::encryptString(trim($request->key)) : null;
 
-        return $connection->update($request->all());
+        $sftp = Connection::makeSftpConnection($request->host, $request->port, $request->username, $password, 3, $key);
+
+        if (is_null($sftp)) {
+            $ftp = Connection::makeFtpConnection($request->host, $request->port, $request->username, $password, 3);
+
+            if (is_null($ftp)) {
+                return redirect()->route('connection.edit')->with('failed', 'Failed to connect with SFTP and FTP');
+            }
+
+            $is_sftp = 0;//Connected via FTP
+        } else {
+            $is_sftp = 1;//SFTP
+        }
+
+        $request->merge([
+            'is_sftp' => $is_sftp,
+            'password' => $password,
+            'key' => $key
+        ]);
+
+        $connection->update($request->all());
+
+        return redirect()->route('connection.show', $connection)->with('success', 'Connection updated successfully');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Connection $connection)
+    public function destroy(Connection $connection): ?bool
     {
-        //
+        return $connection->delete();
     }
 }
