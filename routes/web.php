@@ -21,10 +21,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/connections/{connection}', [ConnectionController::class, 'update'])->name('connection.update');
     Route::delete('/connections/{connection}', [ConnectionController::class, 'destroy'])->name('connection.destroy');
 
-    Route::get('/connections', [ConnectionController::class, 'index'])->name('profile.edit');
 
-
-    Route::get('/file/{file}', [FileController::class, 'show'])->name('file.show');
+    Route::get('/files', [FileController::class, 'index'])->name('file.index');
+    Route::get('/files/{file}', [FileController::class, 'show'])->name('file.show');
 
 });
 
