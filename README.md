@@ -1,9 +1,7 @@
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-
-[![Laravel - 11](https://img.shields.io/badge/Laravel-11-red)](https://)
-
-[![PHP - 8.2](https://img.shields.io/badge/PHP-8.2-purple)](https://)
+[![Laravel - 11](https://img.shields.io/badge/Laravel-11-red)]()
+[![PHP - 8.2](https://img.shields.io/badge/PHP-8.2-purple.svg)]()
 
 
 <h1 align="center">Example File actions with FTP and SFTP</h1>
