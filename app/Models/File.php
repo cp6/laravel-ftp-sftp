@@ -576,4 +576,22 @@ class File extends Model
         return $this->line_contents[] = [$this->load_file->current()];
     }
 
+    public static function appendToFile(File $file, string $data): ?bool
+    {
+        if (!self::fileExists($file)) {
+            return null;
+        }
+
+        return Storage::disk($file->disk)->append($file->saved_to . '/' . $file->saved_as, $data);
+    }
+
+    public static function prependToFile(File $file, string $data): ?bool
+    {
+        if (!self::fileExists($file)) {
+            return null;
+        }
+
+        return Storage::disk($file->disk)->prepend($file->saved_to . '/' . $file->saved_as, $data);
+    }
+
 }
