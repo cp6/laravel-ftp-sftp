@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\File;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class FileController extends Controller
 {
@@ -58,8 +59,18 @@ class FileController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(File $file)
+    public function destroy(File $file): bool
     {
-        //
+        if (!File::fileExists($file)) {
+            return false;
+        }
+
+        $delete = Storage::disk($file->disk)->delete($file->saved_to . '/' . $file->saved_as);
+
+        if ($delete) {
+            return $file->delete();
+        }
+
+        return false;
     }
 }

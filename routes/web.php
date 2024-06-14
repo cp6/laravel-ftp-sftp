@@ -24,6 +24,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/files', [FileController::class, 'index'])->name('file.index');
     Route::get('/files/{file}', [FileController::class, 'show'])->name('file.show');
+    Route::delete('/files/{file}', [FileController::class, 'destroy'])->name('file.destroy');
 
 });
 
