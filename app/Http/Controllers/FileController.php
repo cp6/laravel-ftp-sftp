@@ -51,9 +51,15 @@ class FileController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, File $file)
+    public function update(Request $request, File $file): bool
     {
-        //
+        if (!File::fileExists($file)) {
+            return false;
+        }
+
+        $size_kb = Storage::disk($file->disk)->size($file->saved_to . '/' . $file->saved_as) / 1024;
+
+        return $file->update(['size_kb' => $size_kb]);
     }
 
     /**
