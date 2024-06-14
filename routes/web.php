@@ -24,6 +24,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/files', [FileController::class, 'index'])->name('file.index');
     Route::get('/files/{file}', [FileController::class, 'show'])->name('file.show');
+    Route::patch('/files/{file}', [FileController::class, 'update'])->name('file.update');
     Route::delete('/files/{file}', [FileController::class, 'destroy'])->name('file.destroy');
 
 });
