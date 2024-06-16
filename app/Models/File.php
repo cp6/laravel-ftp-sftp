@@ -333,7 +333,7 @@ class File extends Model
     {
         try {
             $file_path = $file->saved_to . '/' . $file->saved_as;
-            if (!Storage::disk($file->disk)->exists($file_path)) {
+            if (!self::fileExists($file)) {
                 return false;
             }
 
