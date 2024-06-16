@@ -350,6 +350,24 @@ class File extends Model
         }
     }
 
+    public static function displayFileInBrowser(File $file)
+    {
+        try {
+            if (!self::fileExists($file)) {
+                return false;
+            }
+
+            $mime_type = Storage::disk($file->disk)->mimeType($file->saved_to . '/' . $file->saved_as);
+
+            return response(Storage::disk($file->disk)->get($file->saved_to . '/' . $file->saved_as), 200)
+                ->header('Content-Type', $mime_type)
+                ->header('Content-Disposition', 'inline; filename="' . basename($file->saved_to . '/' . $file->saved_as) . '"');
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+            abort(404, 'File not found.');
+        }
+    }
+
     public static function uploadFile(Connection $connection, string $local_disk, string $local_filepath, string $upload_as): bool
     {
         if ($connection->is_sftp === 1) {
