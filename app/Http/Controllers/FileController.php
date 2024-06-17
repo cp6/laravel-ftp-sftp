@@ -58,8 +58,9 @@ class FileController extends Controller
         }
 
         $size_kb = Storage::disk($file->disk)->size($file->saved_to . '/' . $file->saved_as) / 1024;
+        $mime = Storage::disk($file->disk)->mimeType($file->saved_to . '/' . $file->saved_as);
 
-        return $file->update(['size_kb' => $size_kb]);
+        return $file->update(['size_kb' => $size_kb, 'mime' => $mime]);
     }
 
     /**
