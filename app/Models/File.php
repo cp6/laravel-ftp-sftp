@@ -19,7 +19,7 @@ class File extends Model
 
     public array $line_contents = [];
 
-    protected $fillable = ['size_kb', 'ext', 'disk', 'saved_to', 'saved_as', 'original_dir', 'original_name', 'last_line_read', 'total_lines'];
+    protected $fillable = ['size_kb', 'ext', 'disk', 'saved_to', 'saved_as', 'original_dir', 'original_name', 'last_line_read', 'total_lines', 'mime'];
 
     protected $with = ['connection'];
 
