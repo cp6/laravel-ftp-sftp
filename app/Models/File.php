@@ -614,4 +614,29 @@ class File extends Model
         return Storage::disk($file->disk)->prepend($file->saved_to . '/' . $file->saved_as, $data);
     }
 
+    public static function listFilesInDirectory(string $disk, string $path): array
+    {
+        return Storage::disk($disk)->files($path);
+    }
+
+    public static function listAllFilesInDirectory(string $disk, string $path): array
+    {
+        return Storage::disk($disk)->allFiles($path);
+    }
+
+    public static function listDirectoriesInDirectory(string $disk, string $path): array
+    {
+        return Storage::disk($disk)->allDirectories($path);
+    }
+
+    public static function createDirectory(string $disk, string $path): bool
+    {
+        return Storage::disk($disk)->makeDirectory($path);
+    }
+
+    public static function deleteDirectory(string $disk, string $path): bool
+    {
+        return Storage::disk($disk)->deleteDirectory($path);
+    }
+
 }
