@@ -29,5 +29,18 @@ Examples include:
 <h3>Connection</h3>
 Used for creating SFTP and FTP connections
 
+Make an SFTP connection:
+
+```php
+Connection::makeSftpConnection(string $host, int $port, string $user, ?string $password = '', int $timeout = 8, ?string $key = ''): ?SFTP
+```
+
+FTP connection:
+```php
+Connection::makeFtpConnection(string $host, int $port, string $user, ?string $password = '', int $timeout = 8): ?\FTP\Connection
+```
+
+
+
 <h3>File</h3>
 File actions such as downloading, uploading, deleting, moving and reading.
