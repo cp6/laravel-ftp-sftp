@@ -80,3 +80,13 @@ Connection::listFtpFilesDirectories(Connection $connection, string $path = ''): 
 
 ## File
 File actions such as downloading, uploading, deleting, moving and reading.
+
+Download a file and create a File entry in the DB:
+
+```php
+Connection::downloadFtpFile(Connection $connection, string $file_to_download, string $disk, string $save_to, string $save_as): bool
+```
+
+```php
+Connection::downloadSftpFile(Connection $connection, string $file_to_download, string $disk, string $save_to, string $save_as): bool
+```
