@@ -40,6 +40,42 @@ FTP connection:
 Connection::makeFtpConnection(string $host, int $port, string $user, ?string $password = '', int $timeout = 8): ?\FTP\Connection
 ```
 
+SFTP file and directory methods:
+
+```php
+Connection::listSftpCurrentDirectorySize(Connection $connection, string $path = ''): ?array
+```
+
+```php
+Connection::listSftpDirectories(Connection $connection, string $path = ''): ?array
+```
+
+```php
+Connection::listSftpFiles(Connection $connection, string $path = ''): ?array
+```
+
+```php
+Connection::listSftpFilesDirectories(Connection $connection, string $path = ''): ?array
+```
+
+
+FTP file and directory methods:
+
+```php
+Connection::listFtpDirectories(Connection $connection, string $path = ''): ?array
+```
+
+```php
+Connection::listFtpFiles(Connection $connection, string $path = ''): ?array
+```
+
+```php
+Connection::listFtpCurrentDirectorySize(Connection $connection, string $path = ''): ?array
+```
+
+```php
+Connection::listFtpFilesDirectories(Connection $connection, string $path = ''): ?array
+```
 
 
 <h3>File</h3>
