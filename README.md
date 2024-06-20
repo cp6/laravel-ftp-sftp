@@ -24,23 +24,23 @@ Examples include:
 - Blade files to view/create/edit Connections
 
 
-<h2>The main models and their roles</h2>
+### The main models and their roles:
 
-<h3>Connection</h3>
+## Connection
 Used for creating SFTP and FTP connections
 
-Make an SFTP connection:
+### SFTP connection:
 
 ```php
 Connection::makeSftpConnection(string $host, int $port, string $user, ?string $password = '', int $timeout = 8, ?string $key = ''): ?SFTP
 ```
 
-FTP connection:
+### FTP connection:
 ```php
 Connection::makeFtpConnection(string $host, int $port, string $user, ?string $password = '', int $timeout = 8): ?\FTP\Connection
 ```
 
-SFTP file and directory methods:
+### SFTP file and directory methods:
 
 ```php
 Connection::listSftpCurrentDirectorySize(Connection $connection, string $path = ''): ?array
@@ -59,7 +59,7 @@ Connection::listSftpFilesDirectories(Connection $connection, string $path = ''):
 ```
 
 
-FTP file and directory methods:
+### FTP file and directory methods:
 
 ```php
 Connection::listFtpDirectories(Connection $connection, string $path = ''): ?array
@@ -78,5 +78,5 @@ Connection::listFtpFilesDirectories(Connection $connection, string $path = ''): 
 ```
 
 
-<h3>File</h3>
+## File
 File actions such as downloading, uploading, deleting, moving and reading.
