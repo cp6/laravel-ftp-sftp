@@ -2,6 +2,7 @@
 
 [![Laravel - 11](https://img.shields.io/badge/Laravel-11-red)]()
 [![PHP - 8.2](https://img.shields.io/badge/PHP-8.2-purple.svg)]()
+[![Readme in progress](https://img.shields.io/badge/Readme_in_progress-ff8000)](https://)
 
 
 <h1 align="center">Example File actions with FTP and SFTP</h1>
@@ -23,10 +24,10 @@ Examples include:
 - Read files from the last line read
 - Blade files to view/create/edit Connections
 
-
 ### The main models and their roles:
 
 ## Connection
+
 Used for creating SFTP and FTP connections
 
 ### SFTP connection:
@@ -36,6 +37,7 @@ Connection::makeSftpConnection(string $host, int $port, string $user, ?string $p
 ```
 
 ### FTP connection:
+
 ```php
 Connection::makeFtpConnection(string $host, int $port, string $user, ?string $password = '', int $timeout = 8): ?\FTP\Connection
 ```
@@ -58,7 +60,6 @@ Connection::listSftpFiles(Connection $connection, string $path = ''): ?array
 Connection::listSftpFilesDirectories(Connection $connection, string $path = ''): ?array
 ```
 
-
 ### FTP file and directory methods:
 
 ```php
@@ -77,8 +78,8 @@ Connection::listFtpCurrentDirectorySize(Connection $connection, string $path = '
 Connection::listFtpFilesDirectories(Connection $connection, string $path = ''): ?array
 ```
 
-
 ## File
+
 File actions such as downloading, uploading, deleting, moving and reading.
 
 Download a file and create a File entry in the DB:
@@ -90,3 +91,36 @@ File::downloadFtpFile(Connection $connection, string $file_to_download, string $
 ```php
 File::downloadSftpFile(Connection $connection, string $file_to_download, string $disk, string $save_to, string $save_as): bool
 ```
+
+## Reading a large file
+
+Uses SplFileObject
+
+```php
+File::readLines(File $file, int $number_of_lines = 100): ?array
+```
+
+readLines will update the DB for File last line read and total lines.
+
+```php
+File::readLinesFromTo(File $file, int $from = 0, int $to = 100): ?array
+```
+
+```php
+File::readLastLines(File $file, int $amount = 20): ?array
+``````
+
+```php
+File::readOneLine(File $file, int $line = 1): ?array
+```
+
+## Writing to file
+
+```php
+File::appendToFile(File $file, string $data): ?bool
+``````
+
+```php
+File::prependToFile(File $file, string $data): ?bool
+```
+
