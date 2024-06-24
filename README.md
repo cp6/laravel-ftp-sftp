@@ -2,12 +2,11 @@
 
 [![Laravel - 11](https://img.shields.io/badge/Laravel-11-red)]()
 [![PHP - 8.2](https://img.shields.io/badge/PHP-8.2-purple.svg)]()
-[![Readme in progress](https://img.shields.io/badge/Readme_in_progress-ff8000)](https://)
 
 
 <h1 align="center">Example File actions with FTP and SFTP</h1>
 
-Laravel-ftp-sftp provides examples of using the FTP and SFTP protocols combined with Laravel to manage files.
+Laravel-ftp-sftp provides examples of using the FTP, SFTP and local storage protocols combined with Laravel to manage files.
 
 Examples include:
 
@@ -60,6 +59,23 @@ Connection::listSftpFiles(Connection $connection, string $path = ''): ?array
 Connection::listSftpFilesDirectories(Connection $connection, string $path = ''): ?array
 ```
 
+```php
+File::uploadFile(Connection $connection, string $local_disk, string $local_filepath, string $upload_as): bool
+```
+
+```php
+File::outputSftpFileToBrowser(Connection $connection, string $file_path)
+```
+
+```php
+File::deleteSftpFile(Connection $connection, string $file_to_delete): bool
+```
+
+```php
+File::renameSftpFile(Connection $connection, string $current_path, string $new_name): bool
+```
+
+
 ### FTP file and directory methods:
 
 ```php
@@ -78,6 +94,18 @@ Connection::listFtpCurrentDirectorySize(Connection $connection, string $path = '
 Connection::listFtpFilesDirectories(Connection $connection, string $path = ''): ?array
 ```
 
+```php
+File::readLinesFtp(Connection $connection, string $file_path, int $start = 0, int $num_lines = 100): ?array
+```
+
+```php
+File::renameFtpFile(Connection $connection, string $current_path, string $new_name): bool
+```
+
+```php
+File::deleteFtpFile(Connection $connection, string $file_to_delete): bool
+```
+
 ## File
 
 File actions such as downloading, uploading, deleting, moving and reading.
@@ -91,8 +119,66 @@ File::downloadFtpFile(Connection $connection, string $file_to_download, string $
 ```php
 File::downloadSftpFile(Connection $connection, string $file_to_download, string $disk, string $save_to, string $save_as): bool
 ```
+## Local file and directory actions
 
-## Reading a large file
+
+```php
+File::fileExists(File $file): bool
+```
+
+```php
+File::moveFile(File $file, string $move_to, string $disk = ''): bool
+```
+
+```php
+File::copyFile(File $file, string $copy_to, string $disk = ''): bool
+```
+
+```php
+File::renameFile(File $file, string $new_name): bool
+```
+
+```php
+File::deleteFile(File $file): bool
+```
+
+```php
+File::downloadFileInBrowser(File $file, string $save_as = '')
+```
+
+```php
+File::displayFileInBrowser(File $file)
+```
+
+```php
+File::readFileFromStorage(File $file, int $start = 0, int $end = 100): ?array
+```
+
+
+```php
+File::listFilesInDirectory(string $disk, string $path): array
+```
+
+```php
+File::listAllFilesInDirectory(string $disk, string $path): array
+```
+
+```php
+File::listDirectoriesInDirectory(string $disk, string $path): array
+```
+
+```php
+File::createDirectory(string $disk, string $path): bool
+```
+
+```php
+File::deleteDirectory(string $disk, string $path): bool
+```
+
+
+
+
+## Reading a large local file
 
 Uses SplFileObject
 
@@ -114,7 +200,7 @@ File::readLastLines(File $file, int $amount = 20): ?array
 File::readOneLine(File $file, int $line = 1): ?array
 ```
 
-## Writing to file
+## Writing to local file
 
 ```php
 File::appendToFile(File $file, string $data): ?bool
