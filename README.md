@@ -105,6 +105,8 @@ File::renameFtpFile(Connection $connection, string $current_path, string $new_na
 
 ```php
 File::deleteFtpFile(Connection $connection, string $file_to_delete): bool
+
+File::deleteFtpFile($connection, '/files/logs.txt');
 ```
 
 ## File
@@ -115,10 +117,14 @@ Download a file and create a File entry in the DB:
 
 ```php
 File::downloadFtpFile(Connection $connection, string $file_to_download, string $disk, string $save_to, string $save_as): bool
+
+File::downloadFtpFile($connection, '/files/logs.txt', 'public'. '/downloaded', 'logs.txt');
 ```
 
 ```php
 File::downloadSftpFile(Connection $connection, string $file_to_download, string $disk, string $save_to, string $save_as): bool
+
+File::downloadSftpFile($connection, '/files/logs.txt', 'public'. '/downloaded', 'logs.txt');
 ```
 ## Local file and directory actions
 
@@ -129,6 +135,8 @@ File::fileExists(File $file): bool
 
 ```php
 File::moveFile(File $file, string $move_to, string $disk = ''): bool
+
+File::moveFile($file, '/archived', 'public');
 ```
 
 ```php
@@ -137,6 +145,8 @@ File::copyFile(File $file, string $copy_to, string $disk = ''): bool
 
 ```php
 File::renameFile(File $file, string $new_name): bool
+
+File::renameFile($file, 'new.txt');
 ```
 
 ```php
