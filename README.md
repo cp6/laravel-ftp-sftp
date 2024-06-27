@@ -111,7 +111,7 @@ File::deleteFtpFile($connection, '/files/logs.txt');
 
 File actions such as downloading, uploading, deleting, moving and reading.
 
-Download a file and create a File entry in the DB:
+Download a file and create a File entry in the DB. This uses teh Laravel Storage Facade:
 
 ```php
 File::downloadFtpFile(Connection $connection, string $file_to_download, string $disk, string $save_to, string $save_as): bool
@@ -125,7 +125,6 @@ File::downloadSftpFile(Connection $connection, string $file_to_download, string 
 File::downloadSftpFile($connection, '/files/logs.txt', 'public'. '/downloaded', 'logs.txt');
 ```
 ## Local file and directory actions
-
 
 ```php
 File::fileExists(File $file): bool
@@ -153,10 +152,12 @@ File::deleteFile(File $file): bool
 
 ```php
 File::downloadFileInBrowser(File $file, string $save_as = '')
+//Prompts to download the file in the browser
 ```
 
 ```php
 File::displayFileInBrowser(File $file)
+//Displays the file in the browser
 ```
 
 ```php
