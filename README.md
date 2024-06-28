@@ -71,9 +71,9 @@ File::deleteSftpFile(Connection $connection, string $file_to_delete): bool
 ```
 
 ```php
-File::renameSftpFile(Connection $connection, string $current_path, string $new_name): bool
+File::renameSftpFile(Connection $connection, string $current_path, string $new_path): bool
 
-File::renameSftpFile($connection, 'files/images/dog.jpg', 'cat.jpg');
+File::renameSftpFile($connection, 'files/images/dog.jpg', 'files/images/cat.jpg');
 ```
 
 
@@ -100,9 +100,9 @@ File::readLinesFtp(Connection $connection, string $file_path, int $start = 0, in
 ```
 
 ```php
-File::renameFtpFile(Connection $connection, string $current_path, string $new_name): bool
+File::renameFtpFile(Connection $connection, string $current_path, string $new_path): bool
 
-File::renameFtpFile($connection, 'files/images/dog.jpg', 'cat.jpg');
+File::renameFtpFile($connection, 'files/images/dog.jpg', 'files/images/cat.jpg');
 ```
 
 ```php

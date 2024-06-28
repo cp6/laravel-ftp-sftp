@@ -113,13 +113,12 @@ class File extends Model
         return false;
     }
 
-    public static function renameFtpFile(Connection $connection, string $current_path, string $new_name): bool
+    public static function renameFtpFile(Connection $connection, string $current_path, string $new_path): bool
     {
         try {
             $ftp = Connection::makeFtpConnection($connection->host, $connection->port, $connection->username, $connection->password);
 
             if ($ftp) {
-                $new_path = dirname($current_path) . '/' . $new_name;
 
                 $file_exists = @ftp_size($ftp, $new_path) !== -1;
 
@@ -142,13 +141,12 @@ class File extends Model
         }
     }
 
-    public static function renameSftpFile(Connection $connection, string $current_path, string $new_name): bool
+    public static function renameSftpFile(Connection $connection, string $current_path, string $new_path): bool
     {
         try {
             $sftp = Connection::makeSftpConnection($connection->host, $connection->port, $connection->username, $connection->password);
 
             if ($sftp) {
-                $new_path = dirname($current_path) . '/' . $new_name;
 
                 if ($sftp->file_exists($new_path)) {
                     return false;
