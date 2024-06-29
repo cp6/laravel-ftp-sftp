@@ -512,6 +512,11 @@ class File extends Model
         return $this->load_file;
     }
 
+    protected function closeSplFile(): null
+    {//Closes the file pointer
+        return $this->load_file = null;
+    }
+
     public function readLines(File $file, int $number_of_lines = 100): ?array
     {
         if (is_null($this->setSplFile($file))) {
