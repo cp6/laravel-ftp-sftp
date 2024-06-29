@@ -224,3 +224,8 @@ File::appendToFile(File $file, string $data): ?bool
 File::prependToFile(File $file, string $data): ?bool
 ```
 
+Close the file pointer (If needed).
+
+```php
+File::closeSplFile();
+```
