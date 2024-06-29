@@ -194,7 +194,7 @@ File::deleteDirectory(string $disk, string $path): bool
 
 ## Reading a large local file
 
-Uses SplFileObject
+Uses SplFileObject, memory efficient it does not read through the whole file.
 
 ```php
 File::readLines(File $file, int $number_of_lines = 100): ?array
