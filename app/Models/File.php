@@ -59,6 +59,7 @@ class File extends Model
 
             if ($con) {
                 $handle = fopen('php://temp', 'wb+');
+
                 if (!ftp_fget($con, $handle, $file_to_download, FTP_BINARY)) {
                     fclose($handle);
                     ftp_close($con);
@@ -120,9 +121,7 @@ class File extends Model
 
             if ($ftp) {
 
-                $file_exists = @ftp_size($ftp, $new_path) !== -1;
-
-                if ($file_exists) {
+                if (@ftp_size($ftp, $new_path) !== -1) {
                     return false;
                 }
 
