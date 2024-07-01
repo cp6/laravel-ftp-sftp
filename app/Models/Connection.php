@@ -126,6 +126,7 @@ class Connection extends Model
                             'name' => $item,
                             'size' => $size,
                             'size_kb' => $size / 1024,
+                            'size_mb' => $size / 1024 / 1024
                         ];
                     }
                 }
@@ -230,6 +231,7 @@ class Connection extends Model
                             'name' => $item,
                             'size' => $size,
                             'size_kb' => $size / 1024,
+                            'size_mb' => $size / 1024 / 1024,
                             'is_file' => true
                         ];
                     } else {
@@ -237,6 +239,7 @@ class Connection extends Model
                             'name' => $item,
                             'size' => null,
                             'size_kb' => null,
+                            'size_mb' => null,
                             'is_file' => false
                         ];
                     }
@@ -294,10 +297,12 @@ class Connection extends Model
                 $filePath = $path . '/' . $file;
                 if ($sftp->is_file($filePath)) {
                     $stat = $sftp->stat($filePath);
+                    $size = $stat['size'];
                     $fileList[] = [
                         'name' => $file,
-                        'size' => $stat['size'],
-                        'size_kb' => $stat['size'] / 1024,
+                        'size' => $size,
+                        'size_kb' => $size / 1024,
+                        'size_mb' => $size / 1024 / 1024,
                         'last_access' => $stat['atime'],
                         'last_modified' => $stat['mtime'],
                     ];
@@ -327,10 +332,12 @@ class Connection extends Model
                 $filePath = $path . '/' . $file;
                 if ($sftp->is_file($filePath)) {
                     $stat = $sftp->stat($filePath);
+                    $size = $stat['size'];
                     $list[] = [
                         'name' => $file,
-                        'size' => $stat['size'],
-                        'size_kb' => $stat['size'] / 1024,
+                        'size' => $size,
+                        'size_kb' => $size / 1024,
+                        'size_mb' => $size / 1024 / 1024,
                         'last_access' => $stat['atime'],
                         'last_modified' => $stat['mtime'],
                         'is_file' => true
@@ -340,6 +347,7 @@ class Connection extends Model
                         'name' => $file,
                         'size' => null,
                         'size_kb' => null,
+                        'size_mb' => null,
                         'last_access' => null,
                         'last_modified' => null,
                         'is_file' => false
