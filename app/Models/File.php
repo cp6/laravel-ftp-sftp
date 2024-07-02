@@ -133,11 +133,11 @@ class File extends Model
                 return false;
             }
 
-            return false;
         } catch (\Exception $exception) {
             Log::debug($exception->getMessage());
-            return false;
         }
+
+        return false;
     }
 
     public static function renameSftpFile(Connection $connection, string $current_path, string $new_path): bool
@@ -157,11 +157,11 @@ class File extends Model
 
             }
 
-            return false;
         } catch (\Exception $exception) {
             Log::debug($exception->getMessage());
-            return false;
         }
+
+        return false;
     }
 
     public static function deleteFtpFile(Connection $connection, string $file_to_delete): bool
@@ -192,10 +192,7 @@ class File extends Model
             $sftp = Connection::makeSftpConnection($connection->host, $connection->port, $connection->username, $connection->password, $connection->timeout, $connection->key);
 
             if ($sftp) {
-                if ($sftp->delete($file_to_delete)) {
-                    return true;
-                }
-                return false;
+                return $sftp->delete($file_to_delete);
             }
         } catch (\Exception $exception) {
             Log::debug($exception->getMessage());
@@ -253,11 +250,11 @@ class File extends Model
                 return true;
             }
 
-            return false;
         } catch (\Exception $exception) {
             Log::debug($exception->getMessage());
-            return false;
         }
+
+        return false;
     }
 
     public static function copyFile(File $file, string $copy_to, string $disk = ''): bool
@@ -279,11 +276,11 @@ class File extends Model
                 return true;
             }
 
-            return false;
         } catch (\Exception $exception) {
             Log::debug($exception->getMessage());
-            return false;
         }
+
+        return false;
     }
 
     public static function renameFile(File $file, string $new_name): bool
@@ -302,11 +299,11 @@ class File extends Model
                 return true;
             }
 
-            return false;
         } catch (\Exception $exception) {
             Log::debug($exception->getMessage());
-            return false;
         }
+
+        return false;
     }
 
     public static function deleteFile(File $file): bool
@@ -317,32 +314,31 @@ class File extends Model
             }
 
             if (Storage::disk($file->disk)->delete($file->saved_to . '/' . $file->saved_as)) {
-                $file->delete();
-                return true;
+                return $file->delete();
             }
 
-            return false;
         } catch (\Exception $exception) {
             Log::debug($exception->getMessage());
-            return false;
         }
+
+        return false;
     }
 
     public static function downloadFileInBrowser(File $file, string $save_as = '')
     {
         try {
-            $file_path = $file->saved_to . '/' . $file->saved_as;
+
             if (!self::fileExists($file)) {
                 return false;
             }
 
-            $mimeType = Storage::disk($file->disk)->mimeType($file_path);
+            $mimeType = Storage::disk($file->disk)->mimeType($file->saved_to . '/' . $file->saved_as);
 
             if ($save_as === '') {
-                $save_as = basename($file_path);
+                $save_as = basename($file->saved_to . '/' . $file->saved_as);
             }
 
-            return Storage::disk($file->disk)->download($file_path, $save_as, ['Content-Type' => $mimeType]);
+            return Storage::disk($file->disk)->download($file->saved_to . '/' . $file->saved_as, $save_as, ['Content-Type' => $mimeType]);
         } catch (\Exception $exception) {
             Log::debug($exception->getMessage());
             abort(404, 'File not found.');
