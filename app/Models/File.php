@@ -73,11 +73,11 @@ class File extends Model
                 if (Storage::disk($disk)->put($save_to . $save_as, $fileContents)) {
                     $file = self::createNew($connection->id, $file_to_download, $disk, $save_to, $save_as);
                     $file->update(['mime' => Storage::disk($disk)->mimeType($save_to . '/' . $save_as)]);
+
+                    ftp_close($con);
+                    return true;
                 }
 
-                ftp_close($con);
-
-                return true;
             }
 
         } catch (\Exception $exception) {
@@ -102,9 +102,8 @@ class File extends Model
                 if (Storage::disk($disk)->put($save_to . $save_as, $fileContents)) {
                     $file = self::createNew($connection->id, $file_to_download, $disk, $save_to, $save_as);
                     $file->update(['mime' => Storage::disk($disk)->mimeType($save_to . '/' . $save_as)]);
+                    return true;
                 }
-
-                return true;
             }
 
         } catch (\Exception $exception) {
@@ -145,16 +144,8 @@ class File extends Model
         try {
             $sftp = Connection::makeSftpConnection($connection->host, $connection->port, $connection->username, $connection->password);
 
-            if ($sftp) {
-
-                if ($sftp->file_exists($new_path)) {
-                    return false;
-                }
-
-                if ($sftp->rename($current_path, $new_path)) {
-                    return true;
-                }
-
+            if ($sftp && $sftp->file_exists($new_path)) {
+                return $sftp->rename($current_path, $new_path);
             }
 
         } catch (\Exception $exception) {
