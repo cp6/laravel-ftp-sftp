@@ -585,6 +585,22 @@ class File extends Model
         return $this->line_contents[] = [$this->load_file->current()];
     }
 
+    public function readAllLines(File $file): ?array
+    {
+        if (is_null($this->setSplFile($file))) {
+            return null;
+        }
+
+        $this->line_contents = [];
+
+        while (!$this->load_file->eof()) {
+            $this->line_contents[] = $this->load_file->current();
+            $this->load_file->next();
+        }
+
+        return $this->line_contents;
+    }
+
     public static function appendToFile(File $file, string $data): ?bool
     {
         if (!self::fileExists($file)) {
