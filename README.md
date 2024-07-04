@@ -200,18 +200,27 @@ Uses SplFileObject, memory efficient it does not read through the whole file.
 File::readLines(File $file, int $number_of_lines = 100): ?array
 ```
 
-readLines will update the DB for File last line read and total lines.
+readLines() will start from last line read in the DB and then update last line read and total lines.
 
 ```php
 File::readLinesFromTo(File $file, int $from = 0, int $to = 100): ?array
 ```
 
+readLinesFromTo() is for when you want to read specific lines rather than the sequential readLines().
+
+
 ```php
 File::readLastLines(File $file, int $amount = 20): ?array
 ``````
 
+readLastLines($file, 20) reads the last 20 lines in the file.
+
 ```php
 File::readOneLine(File $file, int $line = 1): ?array
+```
+
+```php
+File::readAllLines(File $file): ?array
 ```
 
 ## Writing to local file
