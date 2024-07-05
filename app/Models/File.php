@@ -71,11 +71,9 @@ class File extends Model
                 fclose($handle);
 
                 if (Storage::disk($disk)->put($save_to . $save_as, $fileContents)) {
-                    $file = self::createNew($connection->id, $file_to_download, $disk, $save_to, $save_as);
-                    $file->update(['mime' => Storage::disk($disk)->mimeType($save_to . '/' . $save_as)]);
-
                     ftp_close($con);
-                    return true;
+                    $file = self::createNew($connection->id, $file_to_download, $disk, $save_to, $save_as);
+                    return $file->update(['mime' => Storage::disk($disk)->mimeType($save_to . '/' . $save_as)]);
                 }
 
             }
@@ -128,8 +126,6 @@ class File extends Model
                     ftp_close($ftp);
                     return true;
                 }
-
-                return false;
             }
 
         } catch (\Exception $exception) {
@@ -167,7 +163,6 @@ class File extends Model
                 }
 
                 ftp_close($ftp);
-                return false;
             }
 
         } catch (\Exception $exception) {
@@ -209,11 +204,11 @@ class File extends Model
                     ->header('Content-Disposition', 'inline; filename="' . basename($file_path) . '"');
             }
 
-            abort(500, 'Failed to retrieve the file.');
         } catch (\Exception $exception) {
             Log::debug($exception->getMessage());
-            abort(500, 'Failed to retrieve the file.');
         }
+
+        abort(500, 'Failed to retrieve the file.');
     }
 
     public static function fileExists(File $file): bool
