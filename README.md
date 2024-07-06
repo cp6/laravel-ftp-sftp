@@ -4,7 +4,7 @@
 [![PHP - 8.2](https://img.shields.io/badge/PHP-8.2-purple.svg)]()
 
 
-<h1 align="center">Example File actions with FTP and SFTP</h1>
+<h1 align="center">Sample PHP Laravel File actions with FTP and SFTP</h1>
 
 Laravel-ftp-sftp provides examples of using the FTP, SFTP and local storage protocols combined with Laravel to manage files.
 
