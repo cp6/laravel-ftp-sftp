@@ -596,6 +596,15 @@ class File extends Model
         return $this->line_contents;
     }
 
+    public static function writeToFile(File $file, string $data, array $options = []): ?bool
+    {
+        if (!self::fileExists($file)) {
+            return null;
+        }
+
+        return Storage::disk($file->disk)->put($file->saved_to . '/' . $file->saved_as, $data, $options);
+    }
+
     public static function appendToFile(File $file, string $data): ?bool
     {
         if (!self::fileExists($file)) {
