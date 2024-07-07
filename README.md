@@ -223,7 +223,17 @@ File::readOneLine(File $file, int $line = 1): ?array
 File::readAllLines(File $file): ?array
 ```
 
+Close the file pointer (If needed).
+
+```php
+File::closeSplFile();
+```
+
 ## Writing to local file
+
+```php
+File::writeToFile(File $file, string $data, array $options => []): ?bool
+``````
 
 ```php
 File::appendToFile(File $file, string $data): ?bool
@@ -231,10 +241,4 @@ File::appendToFile(File $file, string $data): ?bool
 
 ```php
 File::prependToFile(File $file, string $data): ?bool
-```
-
-Close the file pointer (If needed).
-
-```php
-File::closeSplFile();
 ```
