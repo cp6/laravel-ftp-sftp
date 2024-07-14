@@ -76,6 +76,9 @@ File::renameSftpFile(Connection $connection, string $current_path, string $new_p
 File::renameSftpFile($connection, 'files/images/dog.jpg', 'files/images/cat.jpg');
 ```
 
+```php
+File::compareModifiedTimeSftp(Connection $connection, File $file): array
+```
 
 ### FTP file and directory methods:
 
@@ -109,6 +112,10 @@ File::renameFtpFile($connection, 'files/images/dog.jpg', 'files/images/cat.jpg')
 File::deleteFtpFile(Connection $connection, string $file_to_delete): bool
 
 File::deleteFtpFile($connection, '/files/logs.txt');
+```
+
+```php
+File::compareModifiedTimeFtp(Connection $connection, File $file): array
 ```
 
 ## File
