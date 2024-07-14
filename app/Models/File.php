@@ -187,6 +187,44 @@ class File extends Model
         return false;
     }
 
+    public static function compareModifiedTimeFtp(Connection $connection, File $file): ?array
+    {
+        try {
+            $ftp = Connection::makeFtpConnection($connection->host, $connection->port, $connection->username, $connection->password);
+
+            if ($ftp) {
+                $ftp_last_modified = ftp_mdtm($ftp, $file->original_dir . '/' . $file->original_name);
+                $ftp_last_modified_time = \Carbon\Carbon::createFromTimestamp($ftp_last_modified);
+
+                $local_last_modified_time = \Carbon\Carbon::createFromTimestamp(Storage::disk($file->disk)->lastModified($file->saved_to . '/' . $file->saved_as));
+
+                if ($local_last_modified_time->equalTo($ftp_last_modified_time)) {
+                    $ftp_newer = false;
+                    $equal = true;
+                } elseif ($local_last_modified_time->greaterThan($ftp_last_modified_time)) {
+                    $ftp_newer = false;
+                    $equal = false;
+                } else {
+                    $ftp_newer = true;
+                    $equal = false;
+                }
+
+                return [
+                    'local_file_m_time' => $local_last_modified_time,
+                    'ftp_file_m_time' => $ftp_last_modified_time,
+                    'ftp_is_newer' => $ftp_newer,
+                    'files_equal' => $equal,
+                ];
+
+            }
+
+        } catch (\Exception $exception) {
+            Log::debug($exception->getMessage());
+        }
+
+        return null;
+    }
+
     public static function outputSftpFileToBrowser(Connection $connection, string $file_path)
     {
         try {
