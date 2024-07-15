@@ -22,6 +22,7 @@ Examples for SFTP, FTP and storage include:
 - Writing to File
 - Read files without downloading all of it
 - Read files from the last line read
+- Compare files
 - Blade files to view/create/edit Connections
 
 ## Connection
