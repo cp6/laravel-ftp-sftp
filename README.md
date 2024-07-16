@@ -25,6 +25,8 @@ Examples for SFTP, FTP and storage include:
 - Compare files
 - Blade files to view/create/edit Connections
 
+Uses phpseclib for SFTP and PHP-FTP for FTP.
+
 ## Connection
 
 Used for creating SFTP and FTP connections
