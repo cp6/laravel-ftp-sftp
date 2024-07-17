@@ -231,7 +231,7 @@ class File extends Model
             $sftp = Connection::makeSftpConnection($connection->host, $connection->port, $connection->username, $connection->password, $connection->timeout, $connection->key);
 
             if ($sftp) {
-                $sftp_last_modified =  $sftp->lstat($file->original_dir . '/' . $file->original_name);
+                $sftp_last_modified = $sftp->lstat($file->original_dir . '/' . $file->original_name);
                 $sftp_last_modified_time = \Carbon\Carbon::createFromTimestamp($sftp_last_modified['mtime']);
 
                 $local_last_modified_time = \Carbon\Carbon::createFromTimestamp(Storage::disk($file->disk)->lastModified($file->saved_to . '/' . $file->saved_as));
@@ -722,6 +722,21 @@ class File extends Model
     public static function deleteDirectory(string $disk, string $path): bool
     {
         return Storage::disk($disk)->deleteDirectory($path);
+    }
+
+    public static function setFilePublic(File $file): bool
+    {
+        return Storage::disk($file->disk)->setVisibility($file->saved_to . '/' . $file->saved_as, 'public');
+    }
+
+    public static function setFilePrivate(File $file): bool
+    {
+        return Storage::disk($file->disk)->setVisibility($file->saved_to . '/' . $file->saved_as, 'private');
+    }
+
+    public static function getFileVisibility(File $file): string
+    {
+        return Storage::disk($file->disk)->getVisibility($file->saved_to . '/' . $file->saved_as);
     }
 
 }
