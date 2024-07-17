@@ -252,3 +252,15 @@ File::appendToFile(File $file, string $data): ?bool
 ```php
 File::prependToFile(File $file, string $data): ?bool
 ```
+
+```php
+File::setFilePublic(File $file): bool
+```
+
+```php
+File::setFilePrivate(File $file): bool
+```
+
+```php
+File::getFileVisibility(File $file): string
+```
