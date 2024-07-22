@@ -739,4 +739,9 @@ class File extends Model
         return Storage::disk($file->disk)->getVisibility($file->saved_to . '/' . $file->saved_as);
     }
 
+    public static function getHash(File $file): string
+    {
+        return hash_file('md5', Storage::disk($file->disk)->path($file->saved_to . '/' . $file->saved_as));
+    }
+
 }
