@@ -264,3 +264,7 @@ File::setFilePrivate(File $file): bool
 ```php
 File::getFileVisibility(File $file): string
 ```
+
+```php
+File::getHash(File $file): string
+```
