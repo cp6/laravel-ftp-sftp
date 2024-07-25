@@ -8,7 +8,7 @@
 
 Laravel-ftp-sftp provides examples of using the FTP, SFTP and local storage protocols combined with Laravel to manage and action files.
 
-Examples for SFTP, FTP and storage include:
+Examples for SFTP, FTP and storage include these actions:
 
 - List directories
 - List files and sizes
@@ -25,7 +25,7 @@ Examples for SFTP, FTP and storage include:
 - Compare files
 - Blade files to view/create/edit Connections
 
-Uses phpseclib for SFTP and PHP-FTP for FTP.
+Uses phpseclib library for SFTP and PHP-FTP for FTP.
 
 ## Connection
 
